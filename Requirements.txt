@@ -1,0 +1,435 @@
+================================================================
+DISASTER DSS — COMPLETE PROJECT REQUIREMENTS DOCUMENT
+Offline-First AI Disaster Decision-Support System (Chitral/KP)
+================================================================
+Purpose of this document: A single, deeply detailed reference of
+every tool, technology, library, and dependency used in this project
+— what it is, why it was chosen, what it does in THIS project
+specifically, and how it connects to other parts. Intended for
+sharing with new team members for onboarding, learning, and group
+discussion.
+
+
+================================================================
+SECTION 1 — DEVELOPMENT ENVIRONMENT REQUIREMENTS
+================================================================
+
+1.1 Operating System
+--------------------
+Windows 10/11
+Why: Target development machine for this project. All setup
+commands in this document are PowerShell-based accordingly.
+
+1.2 Python
+----------
+Version required: 3.10 or higher
+What it is: General-purpose programming language.
+Why used: All data processing (PDF extraction, chunking, embeddings,
+GIS computation, database building, evaluation) is written in Python
+because of its mature ecosystem of free data-science and geospatial
+libraries.
+Where it runs: Laptop/development machine ONLY — never on the
+Android device.
+
+1.3 Flutter SDK
+---------------
+Version used: 3.47.2 (stable channel)
+What it is: Google's free, open-source UI toolkit for building
+natively compiled mobile applications from a single codebase.
+Why used: Allows building a real, installable Android app with a
+single Dart codebase, with good community support for offline-first
+patterns (local SQLite, GPS access).
+Where it runs: Used to build and run the Android application.
+
+1.4 Dart
+--------
+Version used: 3.13.2 (comes bundled with Flutter)
+What it is: The programming language Flutter apps are written in.
+Why used: Required by Flutter — not an independent choice.
+
+1.5 Android SDK
+---------------
+Platform level used: 37 (Android SDK version 37.0.0)
+Build tools: 36.0.0
+NDK: 28.2.13676358
+What it is: The toolkit required to compile, build, and run Android
+applications.
+Why used: Mandatory for producing an installable Android APK.
+Installed via: Android Studio's SDK Manager.
+
+1.6 Android Studio
+------------------
+What it is: Google's official IDE for Android development.
+Why used: Provides the emulator (Virtual Device Manager), SDK
+management, and a bundled Java Runtime (JBR) used to run Gradle
+builds.
+Note: Also provides JAVA_HOME path used during builds:
+"C:\Program Files\Android\Android Studio\jbr"
+
+1.7 Java (JBR — JetBrains Runtime)
+-----------------------------------
+What it is: A Java runtime bundled inside Android Studio.
+Why used: Android's Gradle build system requires a JVM to run.
+Rather than installing a separate JDK, the project uses the JBR
+already bundled with Android Studio to reduce setup steps.
+
+1.8 Gradle
+----------
+Version used: 9.3.1
+What it is: The build automation tool Android uses to compile,
+package, and assemble APK files.
+Why used: Not chosen directly — it is the mandatory build system
+underlying all Android/Flutter app compilation.
+
+1.9 Git
+-------
+What it is: Version control system.
+Why used: Tracks project history, enables collaboration, and is
+required to push the project to GitHub for team sharing.
+
+
+================================================================
+SECTION 2 — PYTHON LIBRARIES (Laptop-side data pipeline)
+================================================================
+
+2.1 PyMuPDF (imported as `fitz`)
+---------------------------------
+Install: pip install pymupdf
+What it is: A Python library for reading and extracting content
+from PDF files.
+Why used (specifically): To extract raw text, page by page, from
+the real official NDMA/PDMA KP PDF documents collected for this
+project.
+Used in: pipeline/rag/extract.py
+Alternative considered: pdfplumber (also valid, PyMuPDF was chosen
+for speed and simplicity of the page-iteration API).
+
+2.2 pandas
+----------
+Install: pip install pandas
+What it is: A data analysis and manipulation library, most known for
+its DataFrame structure.
+Why used (specifically): To read and iterate over the
+source_registry.csv file (the manually created list of official
+document metadata — organization, title, URL, publication date, etc.)
+Used in: pipeline/rag/extract.py
+
+2.3 sentence-transformers
+--------------------------
+Install: pip install sentence-transformers
+Model used: paraphrase-multilingual-MiniLM-L12-v2 (downloaded
+automatically on first run, ~470MB)
+What it is: A library (built on top of HuggingFace Transformers) for
+generating dense vector embeddings of text, with pretrained
+multilingual models.
+Why used (specifically): To convert text chunks (from official
+documents) and user queries into numeric vectors that capture
+semantic meaning — enabling the LAPTOP-SIDE FAISS retrieval and
+evaluation to work across English, Urdu, and Roman Urdu in the same
+vector space.
+Where it runs: Laptop/backend ONLY — never on Android (too heavy for
+a 4GB-RAM device to run reliably).
+Used in: pipeline/rag/embed.py, evaluation/retrieval_eval.py,
+backend/routers/query.py
+
+2.4 faiss-cpu
+-------------
+Install: pip install faiss-cpu
+What it is: Facebook AI's library for efficient similarity search
+over dense vectors (CPU-only version, no GPU required).
+Why used (specifically): To build a fast searchable index of all
+document-chunk embeddings, so the laptop-side backend/evaluation can
+quickly find the most semantically relevant chunks for any query.
+Where it runs: Laptop/backend ONLY.
+Used in: pipeline/rag/embed.py, evaluation/retrieval_eval.py,
+backend/routers/query.py
+
+2.5 rasterio
+------------
+Install: pip install rasterio
+What it is: A Python library for reading, writing, and analyzing
+geospatial raster data (like DEM elevation files).
+Why used (specifically): To read the Copernicus DEM .tif file for
+Chitral and extract elevation values, and to compute slope from
+elevation using numerical gradients.
+Where it runs: Laptop ONLY (heavy native GDAL dependency, not
+feasible reliably on Android).
+Used in: pipeline/gis/compute_hazard_grid.py
+
+2.6 GDAL (Geospatial Data Abstraction Library)
+------------------------------------------------
+What it is: The underlying C/C++ library that rasterio, geopandas,
+and most geospatial Python tools depend on internally.
+Why used (specifically): Not called directly in project code, but
+required as a system dependency for rasterio/geopandas to function.
+Note: On Windows, this is often the trickiest dependency to install;
+conda-forge is recommended if pip installation fails.
+
+2.7 geopandas
+-------------
+Install: pip install geopandas
+What it is: Extends pandas to support geographic/vector data (like
+rivers, roads, boundaries) as GeoDataFrames.
+Why used (specifically): To read the OpenStreetMap-derived
+chitral_rivers.geojson file and perform spatial operations (like
+measuring distance from a point to the nearest river).
+Where it runs: Laptop ONLY.
+Used in: pipeline/gis/compute_hazard_grid.py
+
+2.8 Shapely
+-----------
+Install: pip install shapely
+What it is: A library for manipulation and analysis of planar
+geometric objects (points, lines, polygons).
+Why used (specifically): To represent each hazard-grid sample point
+as a geometric Point object and calculate its distance to the
+river geometry (via geopandas' unary_union of river lines).
+Where it runs: Laptop ONLY.
+Used in: pipeline/gis/compute_hazard_grid.py
+
+2.9 numpy
+---------
+Install: pip install numpy
+What it is: The fundamental numerical computing library for Python
+(array operations, math functions).
+Why used (specifically): For computing slope from the DEM elevation
+array using np.gradient(), and for numeric operations throughout the
+GIS and embedding pipelines.
+Used in: pipeline/gis/compute_hazard_grid.py, pipeline/rag/embed.py
+
+2.10 sqlite3 (Python standard library — no install needed)
+-------------------------------------------------------------
+What it is: Python's built-in module for working with SQLite
+databases.
+Why used (specifically): To create and populate both
+knowledge.sqlite (the text knowledge base) and hazard_grid.sqlite
+(the precomputed GIS hazard lookup table) — the two files that get
+bundled into the Android app.
+Used in: pipeline/package_builder/build_sqlite.py,
+pipeline/gis/compute_hazard_grid.py
+
+2.11 hashlib (Python standard library)
+-----------------------------------------
+What it is: Provides cryptographic hash functions.
+Why used (specifically): To generate a SHA-256 checksum of the
+knowledge base content, stored in package_meta — this supports data
+provenance/versioning (proving whether the offline package has
+changed between builds).
+Used in: pipeline/package_builder/build_sqlite.py
+
+2.12 fastapi
+------------
+Install: pip install fastapi
+What it is: A modern, high-performance Python web framework for
+building APIs.
+Why used (specifically): To build the OPTIONAL online backend that
+serves richer search results and handles official alert
+storage/sync when the app has internet connectivity.
+Where it runs: Laptop/server, only for ONLINE mode — the app's core
+function does not depend on this being available.
+Used in: backend/main.py, backend/routers/*.py
+
+2.13 uvicorn
+------------
+Install: pip install uvicorn
+What it is: A lightning-fast ASGI server implementation, used to
+actually run a FastAPI application.
+Why used (specifically): To start and serve the backend locally
+during development/demo (`uvicorn main:app --reload`).
+
+2.14 pydantic (installed automatically with fastapi)
+--------------------------------------------------------
+What it is: A data validation library using Python type hints.
+Why used (specifically): FastAPI uses Pydantic models (like the
+Alert class) to validate incoming request data (e.g., ensuring an
+alert has all required fields before it's accepted).
+Used in: backend/routers/alerts.py, backend/routers/query.py
+
+2.15 requests
+-------------
+Install: pip install requests
+What it is: A simple, widely used HTTP client library for Python.
+Why used (specifically): To manually submit a verified alert to the
+backend from a script, simulating how a real alert would be entered
+(since no real government API exists to automate this).
+Used in: backend/ingestion/manual_ingest.py
+
+
+================================================================
+SECTION 3 — FLUTTER / DART LIBRARIES (Android application)
+================================================================
+
+3.1 sqflite
+-----------
+pubspec.yaml: sqflite: ^2.3.0
+What it is: A Flutter plugin providing SQLite database access on
+Android and iOS.
+Why used (specifically): To open and query the bundled
+knowledge.sqlite and hazard_grid.sqlite files directly on the phone
+— this is the core mechanism enabling fully offline retrieval.
+Used in: app/lib/core/local_db/local_db.dart,
+app/lib/core/retrieval/retrieval_engine.dart,
+app/lib/features/map/map_screen.dart
+
+3.2 sqlite3_flutter_libs
+--------------------------
+pubspec.yaml: sqlite3_flutter_libs: ^0.5.20
+What it is: A Flutter plugin that bundles a specific, complete
+SQLite native library with the app, instead of relying purely on
+whatever SQLite version ships with the Android OS.
+Why used (specifically): Added after discovering that Android's
+built-in SQLite (used by sqflite by default) does not reliably
+support the FTS5 (full-text search) extension across all
+devices/emulators. IMPORTANT PROJECT DECISION: after this discovery,
+the knowledge base schema was redesigned to use a PLAIN table with
+LIKE-based text matching instead of FTS5 — making retrieval reliable
+across all Android devices without depending on a native extension
+being present.
+
+3.3 path
+--------
+pubspec.yaml: path: ^1.8.3
+What it is: A Flutter/Dart utility library for manipulating
+filesystem paths in a platform-independent way.
+Why used (specifically): To construct the correct file path for
+where the SQLite databases should be copied on the device's local
+storage (using `join()`).
+Used in: app/lib/core/local_db/local_db.dart
+
+3.4 path_provider
+------------------
+pubspec.yaml: path_provider: ^2.1.1
+What it is: A Flutter plugin for finding correct, platform-specific
+file system locations (like the app's documents directory).
+Why used (specifically): To determine where on the Android device
+the app is allowed to store its copy of the SQLite database files.
+Used in: app/lib/core/local_db/local_db.dart
+
+3.5 geolocator
+--------------
+pubspec.yaml: geolocator: ^10.1.0
+What it is: A Flutter plugin for accessing the device's GPS location
+and requesting location permissions.
+Why used (specifically): To get the user's current latitude/
+longitude, which is then matched against the nearest cell in the
+precomputed hazard_grid.sqlite — this is what powers the
+location-aware hazard indicator feature.
+Used in: app/lib/features/map/map_screen.dart
+
+3.6 http
+--------
+pubspec.yaml: http: ^1.1.0
+What it is: A simple Flutter/Dart package for making HTTP network
+requests.
+Why used (specifically): Intended for the app to call the OPTIONAL
+FastAPI backend (for online sync/fresh alerts) when internet is
+available.
+
+3.7 connectivity_plus
+-----------------------
+pubspec.yaml: connectivity_plus: ^5.0.2
+What it is: A Flutter plugin to check the device's current network
+connectivity status (WiFi, mobile data, or none).
+Why used (specifically): To let the app detect whether it is online
+or offline, so it can decide whether to attempt syncing with the
+backend or rely purely on the local offline database.
+
+3.8 onnxruntime (added during Phase 7 exploration)
+------------------------------------------------------
+pubspec.yaml: onnxruntime: ^1.4.1
+What it is: A Flutter binding for Microsoft's ONNX Runtime, used to
+run machine learning models (like a semantic re-ranking embedding
+model) directly on-device.
+Why used (specifically): Explored as an OPTIONAL enhancement to
+re-rank retrieved chunks by semantic similarity instead of pure
+keyword matching. NOT part of the mandatory core — the app works
+completely without this.
+Status: Experimental/optional (Phase 7), not required for core
+functionality.
+
+3.9 dart_sentencepiece_tokenizer (added during Phase 7 exploration)
+-------------------------------------------------------------------
+pubspec.yaml: dart_sentencepiece_tokenizer: ^1.4.0
+What it is: A pure-Dart implementation of the SentencePiece
+tokenizer, used to convert text into the token IDs a transformer
+model like MiniLM expects as input.
+Why used (specifically): Required as a companion to onnxruntime if
+attempting on-device semantic re-ranking — the tokenizer converts a
+user's query into the numeric format the ONNX embedding model needs.
+Status: Experimental/optional (Phase 7), not required for core
+functionality.
+
+
+================================================================
+SECTION 4 — DATA SOURCES (not software, but essential inputs)
+================================================================
+
+4.1 Official Documents (NDMA, PDMA KP, PMD)
+-----------------------------------------------
+What: Real, manually collected PDF advisories/guidelines relating to
+flood and landslide hazards.
+Why required: This project's core non-negotiable principle is that
+all safety-critical information must trace back to verified official
+sources — never fabricated.
+Collected: 5 verified sources, 221 pages extracted, 465 chunks built.
+
+4.2 Copernicus DEM (Digital Elevation Model)
+-------------------------------------------------
+Source: OpenTopography (portal.opentopography.org)
+Resolution: GLO-30 (~30 meters)
+What it provides: Elevation values for the Chitral bounding box,
+used to compute slope — one of the two inputs to the hazard
+indicator.
+Cost: Free.
+
+4.3 OpenStreetMap (rivers data)
+------------------------------------
+Source: Geofabrik Pakistan extract (download.geofabrik.de)
+What it provides: River/waterway vector geometry, used to compute
+river-proximity — the second input to the hazard indicator.
+Cost: Free, community-maintained.
+
+
+================================================================
+SECTION 5 — HOW ALL PIECES CONNECT (data flow summary)
+================================================================
+
+STAGE 1 (Laptop): PyMuPDF + pandas
+  -> extract text from real PDFs, guided by source_registry.csv
+
+STAGE 2 (Laptop): sentence-transformers + faiss-cpu
+  -> build searchable embeddings index (for laptop/backend use)
+
+STAGE 3 (Laptop): sqlite3 (Python)
+  -> build knowledge.sqlite (plain table, LIKE-searchable) for Android
+
+STAGE 4 (Laptop): rasterio + geopandas + shapely + numpy
+  -> process real DEM + rivers data into hazard_grid.sqlite
+
+STAGE 5 (Android, via Flutter): sqflite + sqlite3_flutter_libs
+  -> bundle both .sqlite files as app assets, query them fully offline
+
+STAGE 6 (Android, via Flutter): geolocator
+  -> get GPS location, look up nearest hazard_grid cell
+
+STAGE 7 (Optional, online): FastAPI + uvicorn + http (Flutter)
+  -> sync fresher official data when internet is available
+
+
+================================================================
+SECTION 6 — QUICK INSTALL COMMANDS (for a new team member)
+================================================================
+
+# Python dependencies (run once, in project root, inside a venv):
+pip install pymupdf pandas sentence-transformers faiss-cpu rasterio geopandas shapely numpy fastapi uvicorn requests
+
+# Flutter dependencies (run inside the app/ folder):
+flutter pub get
+
+# (Windows-specific) if rasterio/geopandas fail to install via pip:
+conda install -c conda-forge rasterio geopandas shapely numpy
+
+
+================================================================
+END OF DOCUMENT
+================================================================
