@@ -1,166 +1,113 @@
+Disaster DSS — Project Requirements Document
 
-# Disaster DSS — Project Requirements Document
-
-**Offline-First AI Disaster Decision-Support System (Chitral / KP, Pakistan)**
+Offline-First AI Disaster Decision-Support System (Chitral / KP, Pakistan)
 
 This document provides a complete, detailed reference of every tool, technology, and library used in this project — what each one is, why it was chosen, and how it fits into the overall system. It is intended for onboarding new team members and for technical group discussion.
 
----
+1. Development Environment
 
-## 1. Development Environment
+Operating System Windows 10/11 — the target development platform for this project.
 
-**Operating System**
-Windows 10/11 — the target development platform for this project.
+Python Version 3.10 or higher. Used for all data processing: PDF extraction, chunking, embeddings, GIS computation, database building, and evaluation. Runs on the laptop only, never on the Android device.
 
-**Python**
-Version 3.10 or higher. Used for all data processing: PDF extraction, chunking, embeddings, GIS computation, database building, and evaluation. Runs on the laptop only, never on the Android device.
+Flutter SDK Version 3.47.2 (stable channel). Google's open-source toolkit for building the Android application from a single Dart codebase, chosen for its mature offline-first mobile patterns and native SQLite support.
 
-**Flutter SDK**
-Version 3.47.2 (stable channel). Google's open-source toolkit for building the Android application from a single Dart codebase, chosen for its mature offline-first mobile patterns and native SQLite support.
+Dart Version 3.13.2, bundled with Flutter. The language the mobile application is written in.
 
-**Dart**
-Version 3.13.2, bundled with Flutter. The language the mobile application is written in.
+Android SDK Platform level 37, build tools 36.0.0, NDK 28.2.13676358. Required to compile and produce an installable Android APK.
 
-**Android SDK**
-Platform level 37, build tools 36.0.0, NDK 28.2.13676358. Required to compile and produce an installable Android APK.
+Android Studio Provides the Android emulator, SDK management, and a bundled Java Runtime (JBR) used for Gradle builds.
 
-**Android Studio**
-Provides the Android emulator, SDK management, and a bundled Java Runtime (JBR) used for Gradle builds.
+Gradle Version 9.3.1. The build automation system underlying Android and Flutter app compilation.
 
-**Gradle**
-Version 9.3.1. The build automation system underlying Android and Flutter app compilation.
+Git Used for version control and to share the project with the team via GitHub.
 
-**Git**
-Used for version control and to share the project with the team via GitHub.
+2. Python Libraries — Data Pipeline (Laptop-Side)
 
----
+PyMuPDF Extracts raw text from the official NDMA and PDMA KP PDF documents that form the project's knowledge base.
 
-## 2. Python Libraries — Data Pipeline (Laptop-Side)
+pandas Reads and processes the source registry (the metadata table describing each official document — organization, title, publication date, and verification status).
 
-**PyMuPDF**
-Extracts raw text from the official NDMA and PDMA KP PDF documents that form the project's knowledge base.
+Sentence-Transformers Multilingual embedding model (paraphrase-multilingual-MiniLM-L12-v2) that converts text into semantic vectors, enabling retrieval and evaluation across English, Urdu, and Roman Urdu. Runs on the laptop and backend only.
 
-**pandas**
-Reads and processes the source registry (the metadata table describing each official document — organization, title, publication date, and verification status).
+FAISS Performs fast similarity search over the generated embeddings, powering the laptop-side and backend retrieval and evaluation pipeline.
 
-**Sentence-Transformers**
-Multilingual embedding model (*paraphrase-multilingual-MiniLM-L12-v2*) that converts text into semantic vectors, enabling retrieval and evaluation across English, Urdu, and Roman Urdu. Runs on the laptop and backend only.
+Rasterio Reads the Copernicus Digital Elevation Model and computes terrain slope, one of the two inputs to the hazard indicator.
 
-**FAISS**
-Performs fast similarity search over the generated embeddings, powering the laptop-side and backend retrieval and evaluation pipeline.
+GDAL The underlying geospatial library that Rasterio and GeoPandas depend on internally.
 
-**Rasterio**
-Reads the Copernicus Digital Elevation Model and computes terrain slope, one of the two inputs to the hazard indicator.
+GeoPandas Reads and processes the OpenStreetMap river data, enabling spatial distance calculations.
 
-**GDAL**
-The underlying geospatial library that Rasterio and GeoPandas depend on internally.
+Shapely Represents geographic points and geometries, used to calculate distance from a location to the nearest river.
 
-**GeoPandas**
-Reads and processes the OpenStreetMap river data, enabling spatial distance calculations.
+NumPy Performs the numerical computation behind slope calculation and vector operations throughout the pipeline.
 
-**Shapely**
-Represents geographic points and geometries, used to calculate distance from a location to the nearest river.
+SQLite3 (Python standard library) Builds the two SQLite databases — the knowledge base and the hazard grid — that are bundled into the Android application.
 
-**NumPy**
-Performs the numerical computation behind slope calculation and vector operations throughout the pipeline.
+FastAPI Powers the optional online backend, providing richer search and official alert synchronization when internet connectivity is available.
 
-**SQLite3 (Python standard library)**
-Builds the two SQLite databases — the knowledge base and the hazard grid — that are bundled into the Android application.
+Uvicorn Runs the FastAPI backend as a live server during development and demonstration.
 
-**FastAPI**
-Powers the optional online backend, providing richer search and official alert synchronization when internet connectivity is available.
+Pydantic Validates incoming backend request data, such as ensuring an alert record contains all required fields.
 
-**Uvicorn**
-Runs the FastAPI backend as a live server during development and demonstration.
+Requests Used to manually submit verified alerts to the backend, simulating official alert entry in the absence of a public government API.
 
-**Pydantic**
-Validates incoming backend request data, such as ensuring an alert record contains all required fields.
+3. Flutter and Dart Libraries — Mobile Application
 
-**Requests**
-Used to manually submit verified alerts to the backend, simulating official alert entry in the absence of a public government API.
+sqflite Provides SQLite database access on Android, forming the core mechanism for fully offline data retrieval.
 
----
+sqlite3_flutter_libs Bundles a complete native SQLite library with the app. Its use led to an important architectural decision: after discovering inconsistent FTS5 (full-text search) support across Android devices, the knowledge base was redesigned around a plain SQLite table with keyword-based matching, ensuring reliable retrieval on every device.
 
-## 3. Flutter and Dart Libraries — Mobile Application
+path Constructs platform-independent file paths for locating the bundled databases on the device.
 
-**sqflite**
-Provides SQLite database access on Android, forming the core mechanism for fully offline data retrieval.
+path_provider Determines the correct, permitted storage location on the Android device for the app's local database files.
 
-**sqlite3_flutter_libs**
-Bundles a complete native SQLite library with the app. Its use led to an important architectural decision: after discovering inconsistent FTS5 (full-text search) support across Android devices, the knowledge base was redesigned around a plain SQLite table with keyword-based matching, ensuring reliable retrieval on every device.
+geolocator Accesses the device's GPS location, which powers the location-aware hazard indicator feature.
 
-**path**
-Constructs platform-independent file paths for locating the bundled databases on the device.
+http Enables the application to communicate with the optional FastAPI backend when internet connectivity is available.
 
-**path_provider**
-Determines the correct, permitted storage location on the Android device for the app's local database files.
+connectivity_plus Detects the device's current network status, allowing the app to decide when to attempt an online sync.
 
-**geolocator**
-Accesses the device's GPS location, which powers the location-aware hazard indicator feature.
+onnxruntime (optional enhancement) Enables on-device machine learning inference, explored for optional semantic re-ranking of search results. Not required for core functionality.
 
-**http**
-Enables the application to communicate with the optional FastAPI backend when internet connectivity is available.
+dart_sentencepiece_tokenizer (optional enhancement) Tokenizes text for use with the ONNX embedding model, supporting the same optional re-ranking feature above.
 
-**connectivity_plus**
-Detects the device's current network status, allowing the app to decide when to attempt an online sync.
+4. Data Sources
 
-**onnxruntime** *(optional enhancement)*
-Enables on-device machine learning inference, explored for optional semantic re-ranking of search results. Not required for core functionality.
+Official Government Documents Verified PDF advisories and guidelines from NDMA, PDMA KP, and PMD, forming the authoritative knowledge base. Five sources were collected, yielding 221 extracted pages and 465 knowledge chunks.
 
-**dart_sentencepiece_tokenizer** *(optional enhancement)*
-Tokenizes text for use with the ONNX embedding model, supporting the same optional re-ranking feature above.
+Copernicus Digital Elevation Model Sourced from OpenTopography at 30-meter resolution, providing the elevation data used to compute terrain slope for the Chitral study area.
 
----
+OpenStreetMap Sourced via the Geofabrik Pakistan extract, providing river and waterway geometry used to compute river-proximity for the hazard indicator.
 
-## 4. Data Sources
-
-**Official Government Documents**
-Verified PDF advisories and guidelines from NDMA, PDMA KP, and PMD, forming the authoritative knowledge base. Five sources were collected, yielding 221 extracted pages and 465 knowledge chunks.
-
-**Copernicus Digital Elevation Model**
-Sourced from OpenTopography at 30-meter resolution, providing the elevation data used to compute terrain slope for the Chitral study area.
-
-**OpenStreetMap**
-Sourced via the Geofabrik Pakistan extract, providing river and waterway geometry used to compute river-proximity for the hazard indicator.
-
----
-
-## 5. System Data Flow
+5. System Data Flow
 
 The project pipeline connects these components in the following sequence:
 
-**Document Processing** — PyMuPDF and pandas extract and organize text from verified official PDFs.
+Document Processing — PyMuPDF and pandas extract and organize text from verified official PDFs.
 
-**Embedding and Indexing** — Sentence-Transformers and FAISS build a searchable semantic index for laptop and backend use.
+Embedding and Indexing — Sentence-Transformers and FAISS build a searchable semantic index for laptop and backend use.
 
-**Knowledge Base Construction** — Python's SQLite module builds the offline knowledge database for the Android app.
+Knowledge Base Construction — Python's SQLite module builds the offline knowledge database for the Android app.
 
-**GIS Processing** — Rasterio, GeoPandas, Shapely, and NumPy transform raw elevation and river data into the precomputed hazard grid.
+GIS Processing — Rasterio, GeoPandas, Shapely, and NumPy transform raw elevation and river data into the precomputed hazard grid.
 
-**Mobile Deployment** — sqflite and sqlite3_flutter_libs bundle both databases into the Flutter application for fully offline querying.
+Mobile Deployment — sqflite and sqlite3_flutter_libs bundle both databases into the Flutter application for fully offline querying.
 
-**Location Awareness** — geolocator retrieves the device's GPS position and matches it against the hazard grid.
+Location Awareness — geolocator retrieves the device's GPS position and matches it against the hazard grid.
 
-**Optional Synchronization** — FastAPI, Uvicorn, and Flutter's http package allow the app to fetch updated official information when connectivity is available.
+Optional Synchronization — FastAPI, Uvicorn, and Flutter's http package allow the app to fetch updated official information when connectivity is available.
 
----
+6. Environment Setup
 
-## 6. Environment Setup
+Python dependencies (run once inside a virtual environment, from the project root):
 
-**Python dependencies** (run once inside a virtual environment, from the project root):
-
-```
 pip install pymupdf pandas sentence-transformers faiss-cpu rasterio geopandas shapely numpy fastapi uvicorn requests
-```
 
-**Flutter dependencies** (run inside the `app` directory):
+Flutter dependencies (run inside the app directory):
 
-```
 flutter pub get
-```
 
-**Windows geospatial installation fallback**, if the standard installation fails:
+Windows geospatial installation fallback, if the standard installation fails:
 
-```
 conda install -c conda-forge rasterio geopandas shapely numpy
-```
