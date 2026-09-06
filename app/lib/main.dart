@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'features/chat/chat_screen.dart';
 import 'features/map/map_screen.dart';
+import 'features/auth/splash_screen.dart';
 
 void main() {
   runApp(const DisasterDssApp());
@@ -16,7 +17,7 @@ class DisasterDssApp extends StatelessWidget {
     return MaterialApp(
       title: 'Disaster DSS',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }
