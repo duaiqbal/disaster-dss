@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../navigation/main_navigation_shell.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
 
@@ -22,10 +23,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    // TODO: wire this up to your actual auth logic (local_db / backend).
     setState(() => _isLoading = true);
     await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
     setState(() => _isLoading = false);
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const MainNavigationShell()),
+    );
   }
 
   @override
@@ -46,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -73,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -175,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-enum _AuthTab { login, signup }
+enum _AuthTab { login }
 
 class _AuthTabSwitch extends StatelessWidget {
   final _AuthTab activeTab;

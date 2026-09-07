@@ -166,7 +166,7 @@ class _LanguageCardState extends State<_LanguageCard> {
           curve: Curves.easeOut,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: selected ? Colors.teal.withOpacity(0.06) : Colors.white,
+            color: selected ? Colors.teal.withValues(alpha: 0.06) : Colors.white,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: selected ? Colors.teal[700]! : Colors.black12,
@@ -175,7 +175,7 @@ class _LanguageCardState extends State<_LanguageCard> {
             boxShadow: selected
                 ? [
                     BoxShadow(
-                      color: Colors.teal.withOpacity(0.15),
+                      color: Colors.teal.withValues(alpha: 0.15),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),

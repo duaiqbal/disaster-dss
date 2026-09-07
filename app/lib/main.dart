@@ -1,11 +1,11 @@
-// UNVERIFIED DRAFT — not run/tested against a real Flutter build.
-
 import 'package:flutter/material.dart';
+import 'core/theme/app_theme.dart';
 import 'features/chat/chat_screen.dart';
 import 'features/map/map_screen.dart';
 import 'features/auth/splash_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const DisasterDssApp());
 }
 
@@ -16,7 +16,8 @@ class DisasterDssApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Disaster DSS',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
       home: const SplashScreen(),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../navigation/main_navigation_shell.dart';
 import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -23,10 +24,13 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> _handleCreateAccount() async {
-    // TODO: wire this up to your actual signup logic (local_db / backend).
     setState(() => _isLoading = true);
     await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
     setState(() => _isLoading = false);
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const MainNavigationShell()),
+    );
   }
 
   @override
@@ -47,7 +51,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -74,7 +78,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
