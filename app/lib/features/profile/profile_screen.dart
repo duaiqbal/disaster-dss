@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/localization/language_service.dart';
@@ -9,10 +10,55 @@ import '../safety/safety_hub_screen.dart';
 import '../feedback/feedback_screen.dart';
 import '../auth/language_selection_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   final VoidCallback? onLogout;
 
   const ProfileScreen({super.key, this.onLogout});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  String? _userName;
+  String? _userEmail;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _userName = prefs.getString('user_name');
+        _userEmail = prefs.getString('user_email');
+      });
+    }
+  }
+
+  String get _displayName {
+    if (_userName != null && _userName!.isNotEmpty) return _userName!;
+    return LanguageService.instance.isUrdu ? 'حفصہ احمد' : 'Hafsa Ahmad';
+  }
+
+  String get _displayEmail {
+    if (_userEmail != null && _userEmail!.isNotEmpty) return _userEmail!;
+    return LanguageService.instance.isUrdu ? 'حفصہ@ایگزامپل.کام' : 'hafsa@example.com';
+  }
+
+  String get _displayInitials {
+    final name = _displayName.trim();
+    final parts = name.split(RegExp(r'\s+'));
+    if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    } else if (name.isNotEmpty) {
+      return name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
+    }
+    return 'HA';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +82,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  LanguageService.instance.isUrdu ? 'ح ا' : 'HA',
+                  _displayInitials,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -47,12 +93,12 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              LanguageService.instance.isUrdu ? 'حفصہ احمد' : 'Hafsa Ahmad',
+              _displayName,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
-              LanguageService.instance.isUrdu ? 'حفصہ@ایگزامپل.کام' : 'hafsa@example.com',
+              _displayEmail,
               style: AppTextStyles.caption,
             ),
             const SizedBox(height: 4),
@@ -265,8 +311,8 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   onPressed: () {
                     Navigator.pop(ctx);
-                    if (onLogout != null) {
-                      onLogout!();
+                    if (widget.onLogout != null) {
+                      widget.onLogout!();
                     }
                   },
                   child: Text(Tr.t('log_out')),

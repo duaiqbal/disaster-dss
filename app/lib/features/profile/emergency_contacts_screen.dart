@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/localization/app_translations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -41,6 +42,19 @@ class EmergencyContactsScreen extends StatelessWidget {
     ),
   ];
 
+  Future<void> _makeCall(BuildContext context, String number) async {
+    final uri = Uri(scheme: 'tel', path: number);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${Tr.t('call_failed')}: $number')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,32 +87,68 @@ class EmergencyContactsScreen extends StatelessWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (context, i) {
                 final c = _contacts[i];
-                return Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(c.name, style: AppTextStyles.cardTitle.copyWith(fontSize: 15)),
-                      const SizedBox(height: 4),
-                      Text(c.description,
-                          style: AppTextStyles.body.copyWith(
-                              color: AppColors.textSecondary, fontSize: 13)),
-                      const SizedBox(height: 10),
-                      const Divider(height: 1),
-                      const SizedBox(height: 10),
-                      Text(
-                        c.number,
-                        style: AppTextStyles.screenHeader.copyWith(
-                          color: AppColors.primary,
-                          fontSize: 28,
+                return InkWell(
+                  onTap: () => _makeCall(context, c.number),
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(c.name,
+                                  style: AppTextStyles.cardTitle
+                                      .copyWith(fontSize: 15)),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryContainer,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.phone,
+                                      size: 13, color: AppColors.primary),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    Tr.t('call_action'),
+                                    style: AppTextStyles.caption.copyWith(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(c.description,
+                            style: AppTextStyles.body.copyWith(
+                                color: AppColors.textSecondary, fontSize: 13)),
+                        const SizedBox(height: 10),
+                        const Divider(height: 1),
+                        const SizedBox(height: 10),
+                        Text(
+                          c.number,
+                          style: AppTextStyles.screenHeader.copyWith(
+                            color: AppColors.primary,
+                            fontSize: 28,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

@@ -18,6 +18,8 @@ dependencies:
   connectivity_plus: ^5.0.2
   onnxruntime: ^1.4.1
   dart_sentencepiece_tokenizer: ^1.4.0
+  shared_preferences: ^2.2.2
+  url_launcher: ^6.2.4
 
 dev_dependencies:
   flutter_test:
@@ -28,4 +30,5 @@ flutter:
   assets:
     - assets/offline_package/
     - assets/onnx_model/
-    
+    - assets/english_designs/
+    - assets/urdu_designs/

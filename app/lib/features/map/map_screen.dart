@@ -200,14 +200,18 @@ class _MapScreenState extends State<MapScreen> {
           ],
         ),
       ),
-      child: CustomPaint(
-        painter: _TerrainPainter(),
+      child: Transform.scale(
+        scale: _zoomLevel,
+        child: CustomPaint(
+          painter: _TerrainPainter(),
+        ),
       ),
     );
   }
 
   // ── App bar overlaid on map ───────────────────────────────────────────────
   Widget _buildMapAppBar() {
+    final canPop = Navigator.of(context).canPop();
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -224,15 +228,17 @@ class _MapScreenState extends State<MapScreen> {
       ),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.maybeOf(context)?.pop(),
-            child: const Icon(
-              Icons.arrow_back,
-              color: AppColors.textPrimary,
-              size: 20,
+          if (canPop) ...[
+            GestureDetector(
+              onTap: () => Navigator.maybeOf(context)?.pop(),
+              child: const Icon(
+                Icons.arrow_back,
+                color: AppColors.textPrimary,
+                size: 20,
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
+            const SizedBox(width: 10),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

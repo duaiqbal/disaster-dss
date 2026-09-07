@@ -15,6 +15,7 @@ class CommunityRiskScreen extends StatefulWidget {
 class _CommunityRiskScreenState extends State<CommunityRiskScreen> {
   List<CommunityReport> _reports = [];
   bool _loading = true;
+  bool _isListView = true;
 
   @override
   void initState() {
@@ -70,9 +71,16 @@ class _CommunityRiskScreenState extends State<CommunityRiskScreen> {
                 children: [
                   _PrivacyCard(),
                   const SizedBox(height: 20),
-                  _SectionHeader(reportCount: _reports.length),
+                  _SectionHeader(
+                    reportCount: _reports.length,
+                    isListView: _isListView,
+                    onToggle: (v) => setState(() => _isListView = v),
+                  ),
                   const SizedBox(height: 12),
-                  ..._reports.map((r) => _ReportCard(report: r)),
+                  if (_isListView)
+                    ..._reports.map((r) => _ReportCard(report: r))
+                  else
+                    const _CommunityMapPlaceholder(),
                   const SizedBox(height: 12),
                   _ReportCta(),
                   const SizedBox(height: 16),
@@ -140,7 +148,15 @@ class _PrivacyCard extends StatelessWidget {
 
 class _SectionHeader extends StatelessWidget {
   final int reportCount;
-  const _SectionHeader({required this.reportCount});
+  final bool isListView;
+  final ValueChanged<bool> onToggle;
+
+  const _SectionHeader({
+    required this.reportCount,
+    required this.isListView,
+    required this.onToggle,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -148,19 +164,18 @@ class _SectionHeader extends StatelessWidget {
         Text(Tr.t('verified_issues'),
             style: AppTextStyles.sectionLabel.copyWith(fontSize: 18)),
         const Spacer(),
-        _ViewToggle(),
+        _ViewToggle(isListView: isListView, onToggle: onToggle),
       ],
     );
   }
 }
 
-class _ViewToggle extends StatefulWidget {
-  @override
-  State<_ViewToggle> createState() => _ViewToggleState();
-}
+class _ViewToggle extends StatelessWidget {
+  final bool isListView;
+  final ValueChanged<bool> onToggle;
 
-class _ViewToggleState extends State<_ViewToggle> {
-  bool _list = true;
+  const _ViewToggle({required this.isListView, required this.onToggle});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -170,8 +185,8 @@ class _ViewToggleState extends State<_ViewToggle> {
       ),
       child: Row(
         children: [
-          _tab(Tr.t('view_list'), _list, () => setState(() => _list = true)),
-          _tab(Tr.t('view_map_tab'), !_list, () => setState(() => _list = false)),
+          _tab(Tr.t('view_list'), isListView, () => onToggle(true)),
+          _tab(Tr.t('view_map_tab'), !isListView, () => onToggle(false)),
         ],
       ),
     );
@@ -190,6 +205,51 @@ class _ViewToggleState extends State<_ViewToggle> {
             style: AppTextStyles.caption.copyWith(
                 color: active ? Colors.white : AppColors.textSecondary,
                 fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
+}
+
+class _CommunityMapPlaceholder extends StatelessWidget {
+  const _CommunityMapPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 280,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: AppColors.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.map_outlined,
+                  size: 28, color: AppColors.primary),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              Tr.t('map_view_soon'),
+              style: AppTextStyles.cardTitle.copyWith(fontSize: 16),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              Tr.t('map_view_soon_desc'),
+              style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -531,8 +591,8 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
                   const SizedBox(height: 10),
                   TextButton.icon(
                     onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Photo upload coming soon.')),
+                      SnackBar(
+                          content: Text(Tr.t('photo_upload_soon'))),
                     ),
                     icon: const Icon(Icons.add_a_photo_outlined,
                         size: 16, color: AppColors.primary),

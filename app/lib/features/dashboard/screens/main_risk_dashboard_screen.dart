@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/localization/app_translations.dart';
@@ -40,6 +41,7 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
 
   bool _isLoading = true;
   String? _errorMessage;
+  String? _userInitials;
 
   CurrentConditions _conditions = CurrentConditions.defaultChitral;
   HouseholdRisk _risk = HouseholdRisk.defaultModerate;
@@ -52,12 +54,30 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _aiRecommendation = _aiRecommendationDefault;
     _repository = widget.repository ?? DisasterRepository();
-    _loadDashboardData();
+    _aiRecommendation = _aiRecommendationDefault;
+    _loadUserInitials();
+    _loadData();
   }
 
-  Future<void> _loadDashboardData() async {
+  Future<void> _loadUserInitials() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('user_name');
+    if (name != null && name.trim().isNotEmpty) {
+      final parts = name.trim().split(RegExp(r'\s+'));
+      String initials;
+      if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
+        initials = '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+      } else {
+        initials = name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
+      }
+      if (mounted) {
+        setState(() => _userInitials = initials);
+      }
+    }
+  }
+
+  Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -85,7 +105,7 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Unable to refresh dashboard: $e';
+          _errorMessage = Tr.t('dashboard_load_error');
           _isLoading = false;
         });
       }
@@ -98,7 +118,7 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: _loadDashboardData,
+          onRefresh: _loadData,
           color: AppColors.primary,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -106,15 +126,15 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(context),
+                _buildHeader(),
                 const SizedBox(height: 20),
                 if (_errorMessage != null)
                   Container(
                     margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
                       color: AppColors.riskHighBg,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       children: [
@@ -124,6 +144,22 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
                           child: Text(
                             _errorMessage!,
                             style: const TextStyle(fontSize: 13, color: AppColors.riskHigh),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _loadData,
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            Tr.t('retry'),
+                            style: const TextStyle(
+                              color: AppColors.riskHigh,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                       ],
@@ -197,7 +233,7 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader() {
     return Row(
       children: [
         Expanded(
@@ -252,8 +288,8 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
             ),
             alignment: Alignment.center,
             child: Text(
-              LanguageService.instance.isUrdu ? 'ح ا' : 'HA',
-              style: TextStyle(
+              _userInitials ?? (LanguageService.instance.isUrdu ? 'ح ا' : 'HA'),
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
                 fontSize: 15,

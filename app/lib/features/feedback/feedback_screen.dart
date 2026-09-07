@@ -31,6 +31,15 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   bool _submitting = false;
 
   Future<void> _submit() async {
+    if (_helpful == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(Tr.t('feedback_required')),
+          backgroundColor: AppColors.primary,
+        ),
+      );
+      return;
+    }
     setState(() => _submitting = true);
     await Future.delayed(const Duration(milliseconds: 600));
     setState(() => _submitting = false);

@@ -90,10 +90,10 @@ class _ChatScreenState extends State<ChatScreen> {
           .toList();
       if (steps.isEmpty) {
         steps = [
-          'Monitor official warnings',
-          'Avoid unstable slopes/river channels',
-          'Keep essential docs/medicines ready',
-          'Follow local authorities',
+          Tr.t('offline_step_1'),
+          Tr.t('offline_step_2'),
+          Tr.t('offline_step_3'),
+          Tr.t('offline_step_4'),
         ];
       }
     }
@@ -126,11 +126,11 @@ class _ChatScreenState extends State<ChatScreen> {
   String _evidenceLabel(EvidenceLevel level) {
     switch (level) {
       case EvidenceLevel.high:
-        return 'High evidence';
+        return Tr.t('evidence_high');
       case EvidenceLevel.moderate:
-        return 'Moderate evidence';
+        return Tr.t('evidence_moderate');
       case EvidenceLevel.limited:
-        return 'Limited evidence';
+        return Tr.t('evidence_limited');
     }
   }
 
@@ -546,7 +546,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           if (msg.evidenceLevel != null) ...[
                             Row(children: [
                               Text(
-                                'Evidence level: ',
+                                Tr.t('xai_evidence_label'),
                                 style: AppTextStyles.caption.copyWith(
                                   color: AppColors.textMuted,
                                   fontSize: 12,
@@ -565,7 +565,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           ],
                           if (msg.sources.isNotEmpty) ...[
                             Text(
-                              'Sources:',
+                              Tr.t('xai_sources_label'),
                               style: AppTextStyles.caption.copyWith(
                                 color: AppColors.textMuted,
                                 fontWeight: FontWeight.w600,
@@ -587,7 +587,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             ),
                           ] else
                             Text(
-                              'Response generated using query context, local weather data, and official risk guidelines for Chitral.',
+                              Tr.t('xai_context_note'),
                               style: AppTextStyles.caption.copyWith(
                                 color: AppColors.textMuted,
                                 fontSize: 12,

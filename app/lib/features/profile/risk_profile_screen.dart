@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/localization/app_translations.dart';
 import '../../core/localization/language_service.dart';
 import '../../core/services/api_service.dart';
@@ -23,9 +24,42 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
   String _transport = 'Easy vehicle access';
   bool _saving = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadSaved();
+  }
+
+  Future<void> _loadSaved() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _construction = prefs.getString('rp_construction') ?? _construction;
+      _riverDistance = prefs.getString('rp_river') ?? _riverDistance;
+      _slopeDistance = prefs.getString('rp_slope') ?? _slopeDistance;
+      _elderly = prefs.getBool('rp_elderly') ?? _elderly;
+      _children = prefs.getBool('rp_children') ?? _children;
+      _disability = prefs.getBool('rp_disability') ?? _disability;
+      _livestock = prefs.getBool('rp_livestock') ?? _livestock;
+      _transport = prefs.getString('rp_transport') ?? _transport;
+      _noVulnerable = !_elderly && !_children && !_disability;
+    });
+  }
+
   Future<void> _save() async {
     setState(() => _saving = true);
-    await ApiService.post('/api/profile', {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('rp_construction', _construction);
+    await prefs.setString('rp_river', _riverDistance);
+    await prefs.setString('rp_slope', _slopeDistance);
+    await prefs.setBool('rp_elderly', _elderly);
+    await prefs.setBool('rp_children', _children);
+    await prefs.setBool('rp_disability', _disability);
+    await prefs.setBool('rp_livestock', _livestock);
+    await prefs.setString('rp_transport', _transport);
+
+    // Fire-and-forget sync to backend
+    ApiService.post('/api/profile', {
       'construction': _construction,
       'river_distance': _riverDistance,
       'slope_distance': _slopeDistance,
@@ -37,11 +71,12 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
       'livestock': _livestock,
       'transport': _transport,
     });
+
     setState(() => _saving = false);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Risk profile saved!'),
+        SnackBar(
+          content: Text(Tr.t('risk_profile_saved_local')),
           backgroundColor: AppColors.primary,
         ),
       );

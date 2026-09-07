@@ -4,6 +4,7 @@ import '../../core/services/disaster_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/localization/app_translations.dart';
+import '../../core/localization/language_service.dart';
 import '../simulator/decision_simulator_screen.dart';
 
 class ForecastScreen extends StatefulWidget {
@@ -18,6 +19,8 @@ class _ForecastScreenState extends State<ForecastScreen> {
   bool _loading = true;
 
 
+  bool _hasError = false;
+
   @override
   void initState() {
     super.initState();
@@ -25,18 +28,30 @@ class _ForecastScreenState extends State<ForecastScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
-    final repo = DisasterRepository();
-    final results = await Future.wait([
-      repo.getCurrentConditions(),
-      repo.getDailyForecast(days: 7),
-    ]);
-    if (mounted) {
-      setState(() {
-        _current = results[0] as CurrentConditions;
-        _forecast = results[1] as List<DailyForecast>;
-        _loading = false;
-      });
+    setState(() {
+      _loading = true;
+      _hasError = false;
+    });
+    try {
+      final repo = DisasterRepository();
+      final results = await Future.wait([
+        repo.getCurrentConditions(),
+        repo.getDailyForecast(days: 7),
+      ]);
+      if (mounted) {
+        setState(() {
+          _current = results[0] as CurrentConditions;
+          _forecast = results[1] as List<DailyForecast>;
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _hasError = true;
+        });
+      }
     }
   }
 
@@ -85,25 +100,53 @@ class _ForecastScreenState extends State<ForecastScreen> {
       body: _loading
           ? const Center(
               child: CircularProgressIndicator(color: AppColors.primary))
-          : RefreshIndicator(
-              onRefresh: _load,
-              color: AppColors.primary,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _CurrentConditionsCard(current: _current!),
-                  const SizedBox(height: 16),
-                  _HourlyForecastCard(),
-                  const SizedBox(height: 16),
-                  _RiskRelevantCard(),
-                  const SizedBox(height: 16),
-                  _DecisionSimCard(),
-                  const SizedBox(height: 16),
-                  _SevenDayCard(forecast: _forecast),
-                  const SizedBox(height: 80),
-                ],
-              ),
-            ),
+          : _hasError
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.cloud_off_outlined,
+                            size: 48, color: AppColors.textMuted),
+                        const SizedBox(height: 12),
+                        Text(
+                          Tr.t('forecast_load_error'),
+                          style: AppTextStyles.body,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: _load,
+                          child: Text(Tr.t('retry')),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : RefreshIndicator(
+                  onRefresh: _load,
+                  color: AppColors.primary,
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      _CurrentConditionsCard(current: _current!),
+                      const SizedBox(height: 16),
+                      _HourlyForecastCard(),
+                      const SizedBox(height: 16),
+                      _RiskRelevantCard(),
+                      const SizedBox(height: 16),
+                      _DecisionSimCard(),
+                      const SizedBox(height: 16),
+                      _SevenDayCard(forecast: _forecast),
+                      const SizedBox(height: 80),
+                    ],
+                  ),
+                ),
     );
   }
 }
@@ -182,16 +225,30 @@ class _ConditionPill extends StatelessWidget {
 
 // ── Hourly forecast card ───────────────────────────────────────────────────
 class _HourlyForecastCard extends StatelessWidget {
-  static List<(String, String, String)> get _hourly => [
-    (Tr.t('now_label'), '🌤', '24°'),
-    ('6 PM', '🌥', '22°'),
-    ('7 PM', '☁️', '21°'),
-    ('8 PM', '☁️', '20°'),
-    ('9 PM', '🌧', '19°'),
-    ('10 PM', '🌧', '18°'),
-  ];
+  static List<(String, String, String)> get _hourly {
+    final now = DateTime.now();
+    String formatHour(DateTime dt) {
+      final h = dt.hour;
+      final ampm = h >= 12
+          ? (LanguageService.instance.isUrdu ? 'شام' : 'PM')
+          : (LanguageService.instance.isUrdu ? 'صبح' : 'AM');
+      final hour = h > 12 ? h - 12 : (h == 0 ? 12 : h);
+      return '$hour $ampm';
+    }
+    return [
+      (Tr.t('now_label'), '🌤', '24°'),
+      (formatHour(now.add(const Duration(hours: 1))), '🌥', '22°'),
+      (formatHour(now.add(const Duration(hours: 2))), '☁️', '21°'),
+      (formatHour(now.add(const Duration(hours: 3))), '☁️', '20°'),
+      (formatHour(now.add(const Duration(hours: 4))), '🌧', '19°'),
+      (formatHour(now.add(const Duration(hours: 5))), '🌧', '18°'),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
+    final hourly = _hourly;
+    final nowLabel = Tr.t('now_label');
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -207,9 +264,9 @@ class _HourlyForecastCard extends StatelessWidget {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: _hourly.map((h) {
+              children: hourly.map((h) {
                 final (time, icon, temp) = h;
-                final isNow = time == Tr.t('now_label');
+                final isNow = time == nowLabel;
                 return Container(
                   margin: const EdgeInsets.only(right: 12),
                   padding: const EdgeInsets.symmetric(
@@ -271,7 +328,7 @@ class _RiskRelevantCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Rainfall is expected to increase over the next 24 hours. Increased rainfall can raise slope saturation and flash-flood risk in vulnerable areas.',
+            Tr.t('risk_weather_para'),
             style: AppTextStyles.body.copyWith(
                 color: AppColors.textSecondary, height: 1.5, fontSize: 13),
           ),
@@ -397,15 +454,23 @@ class _SevenDayCard extends StatelessWidget {
   final List<DailyForecast> forecast;
   const _SevenDayCard({required this.forecast});
 
-  static List<String> get _dayNames => [
-    Tr.t('day_mon'),
-    Tr.t('day_tue'),
-    Tr.t('day_wed'),
-    Tr.t('day_thu'),
-    Tr.t('day_fri'),
-    Tr.t('day_sat'),
-    Tr.t('day_sun'),
-  ];
+  static List<String> get _dayNames {
+    final days = [
+      Tr.t('day_mon'),
+      Tr.t('day_tue'),
+      Tr.t('day_wed'),
+      Tr.t('day_thu'),
+      Tr.t('day_fri'),
+      Tr.t('day_sat'),
+      Tr.t('day_sun'),
+    ];
+    // DateTime.weekday: 1=Mon, 2=Tue, ..., 7=Sun
+    final todayIndex = DateTime.now().weekday - 1;
+    return List.generate(
+      7,
+      (i) => i == 0 ? Tr.t('now_label') : days[(todayIndex + i) % 7],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
