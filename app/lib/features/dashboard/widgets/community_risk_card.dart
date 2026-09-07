@@ -44,7 +44,7 @@ class CommunityRiskCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'See verified reports of blocked roads, local flooding, and other hazards reported by people in your area.',
+            Tr.t('community_risk_desc'),
             style: AppTextStyles.body.copyWith(
               color: AppColors.textSecondary,
               fontSize: 14,

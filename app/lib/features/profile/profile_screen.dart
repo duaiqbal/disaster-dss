@@ -35,9 +35,9 @@ class ProfileScreen extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
-                child: const Text(
-                  'HA',
-                  style: TextStyle(
+                child: Text(
+                  LanguageService.instance.isUrdu ? 'ح ا' : 'HA',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 24,
@@ -46,16 +46,22 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            const Text('Hafsa Ahmad', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              LanguageService.instance.isUrdu ? 'حفصہ احمد' : 'Hafsa Ahmad',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 4),
-            const Text('hafsa@example.com', style: AppTextStyles.caption),
+            Text(
+              LanguageService.instance.isUrdu ? 'حفصہ@ایگزامپل.کام' : 'hafsa@example.com',
+              style: AppTextStyles.caption,
+            ),
             const SizedBox(height: 4),
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.location_on_outlined, size: 14, color: AppColors.textMuted),
-                SizedBox(width: 4),
-                Text('Chitral, Pakistan', style: AppTextStyles.caption),
+                const Icon(Icons.location_on_outlined, size: 14, color: AppColors.textMuted),
+                const SizedBox(width: 4),
+                Text(Tr.t('location_chitral_pk'), style: AppTextStyles.caption),
               ],
             ),
             const SizedBox(height: 24),

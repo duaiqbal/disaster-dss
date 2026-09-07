@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/localization/app_translations.dart';
 import '../navigation/main_navigation_shell.dart';
 import 'login_screen.dart';
 
@@ -60,15 +61,16 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: const Icon(Icons.shield_outlined, color: Colors.teal, size: 32),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Climate Risk Assistant',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              Text(
+                Tr.t('app_title'),
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
-              const Text(
-                'Explainable AI for climate hazard risk and preparedness',
+              Text(
+                Tr.t('app_subtitle'),
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.black54),
+                style: const TextStyle(color: Colors.black54),
               ),
               const SizedBox(height: 24),
               Container(
@@ -95,28 +97,28 @@ class _SignupScreenState extends State<SignupScreen> {
                       },
                     ),
                     const SizedBox(height: 20),
-                    const Text('Full Name', style: TextStyle(fontWeight: FontWeight.w600)),
+                    Text(Tr.t('name'), style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        hintText: 'Jane Doe',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        hintText: Tr.t('name_hint'),
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text('Email', style: TextStyle(fontWeight: FontWeight.w600)),
+                    Text(Tr.t('email'), style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        hintText: 'name@example.com',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        hintText: Tr.t('email_hint'),
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text('Password', style: TextStyle(fontWeight: FontWeight.w600)),
+                    Text(Tr.t('password'), style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _passwordController,
@@ -147,32 +149,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text('Create Account'),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Center(
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (_) => const LoginScreen()),
-                          );
-                        },
-                        child: RichText(
-                          text: TextSpan(
-                            style: const TextStyle(color: Colors.black54),
-                            children: [
-                              const TextSpan(text: 'Already have an account? '),
-                              TextSpan(
-                                text: 'Log in',
-                                style: TextStyle(
-                                  color: Colors.teal[700],
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                            : Text(Tr.t('sign_up_btn')),
                       ),
                     ),
                   ],
@@ -208,9 +185,9 @@ class _AuthTabSwitch extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 alignment: Alignment.center,
-                child: const Text(
-                  'Login',
-                  style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
+                child: Text(
+                  Tr.t('login'),
+                  style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
@@ -224,7 +201,7 @@ class _AuthTabSwitch extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 10),
               alignment: Alignment.center,
               child: Text(
-                'Create account',
+                Tr.t('create_account'),
                 style: TextStyle(color: Colors.teal[700], fontWeight: FontWeight.w600),
               ),
             ),

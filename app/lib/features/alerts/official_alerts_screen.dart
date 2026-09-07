@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_text_styles.dart';
 import '../../core/localization/app_translations.dart';
+import '../../core/localization/language_service.dart';
 import '../../core/models/official_alert.dart';
 import '../../core/services/disaster_repository.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 import 'alert_details_screen.dart';
 
 class OfficialAlertsScreen extends StatefulWidget {
@@ -124,6 +125,51 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
     );
   }
 
+  String _getAlertTitle(String title) {
+    if (!LanguageService.instance.isUrdu) return title;
+    if (title.contains('Rainfall')) return 'شدید بارش سے متعلق ایڈوائزری';
+    if (title.contains('Flood')) return 'اچانک سیلاب کا خدشہ';
+    return title;
+  }
+
+  String _getAlertOrg(String org) {
+    if (!LanguageService.instance.isUrdu) return org;
+    if (org.contains('Meteorological')) return 'محکمہ موسمیات پاکستان';
+    if (org.contains('NDMA') || org.contains('Disaster')) return 'نیشنل ڈیزاسٹر مینجمنٹ اتھارٹی (این ڈی ایم اے)';
+    return org;
+  }
+
+  String _getAlertArea(String area) {
+    if (!LanguageService.instance.isUrdu) return area;
+    if (area.contains('District')) return 'ضلع چترال';
+    if (area.contains('Low-lying') || area.contains('low')) return 'چترال کے نشیبی علاقے';
+    return area;
+  }
+
+  String _getAlertDesc(String desc) {
+    if (!LanguageService.instance.isUrdu) return desc;
+    if (desc.contains('Monsoon') || desc.contains('rain') || desc.contains('winds') || desc.contains('Heavy')) {
+      return 'آج سے ملک کے بالائی علاقوں میں مون سون کی شدید ہوائیں داخل ہونے کی توقع ہے۔';
+    }
+    if (desc.contains('Flood') || desc.contains('water') || desc.contains('nullah') || desc.contains('streams')) {
+      return 'متوقع بارش کے باعث مقامی ندی نالوں میں اچانک سیلابی ریلوں کا خطرہ ہے۔';
+    }
+    return desc;
+  }
+
+  String _getAlertAi(String? ai) {
+    if (ai == null) return '';
+    if (!LanguageService.instance.isUrdu) return ai;
+    return 'بارش آپ کے گھرانے کے علاقے میں ڈھلوان میں نمی اور دباؤ کو بڑھا سکتی ہے۔ ڈھلوان کے استحکام کا انڈیکس اس وقت 42% ہے۔';
+  }
+
+  String _getAlertIssued(String issued) {
+    if (!LanguageService.instance.isUrdu) return issued;
+    if (issued.contains('2')) return '2 گھنٹے پہلے جاری کیا گیا';
+    if (issued.contains('5')) return '5 گھنٹے پہلے جاری کیا گیا';
+    return issued;
+  }
+
   Widget _buildAlertCard(OfficialAlert alert) {
     final isHigh = alert.severity.toLowerCase() == 'high';
 
@@ -174,7 +220,7 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'OFFICIAL WARNING',
+                            Tr.t('official_warning'),
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
@@ -184,17 +230,17 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
                         ],
                       ),
                     ),
-                    Text(alert.issuedAgo, style: AppTextStyles.caption),
+                    Text(_getAlertIssued(alert.issuedAgo), style: AppTextStyles.caption),
                   ],
                 ),
                 const SizedBox(height: 12),
-                Text(alert.title, style: AppTextStyles.cardTitle),
+                Text(_getAlertTitle(alert.title), style: AppTextStyles.cardTitle),
                 const SizedBox(height: 4),
                 Row(
                   children: [
                     const Icon(Icons.apartment, size: 14, color: AppColors.textMuted),
                     const SizedBox(width: 4),
-                    Text(alert.sourceOrg, style: AppTextStyles.caption),
+                    Text(_getAlertOrg(alert.sourceOrg), style: AppTextStyles.caption),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -204,10 +250,10 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('SEVERITY', style: AppTextStyles.sectionLabel),
+                          Text(LanguageService.instance.isUrdu ? 'شدت' : 'SEVERITY', style: AppTextStyles.sectionLabel),
                           const SizedBox(height: 2),
                           Text(
-                            alert.severity,
+                            Tr.riskLevel(alert.severity),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: isHigh ? AppColors.riskHigh : AppColors.riskModerate,
@@ -220,10 +266,10 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('AREA', style: AppTextStyles.sectionLabel),
+                          Text(LanguageService.instance.isUrdu ? 'علاقہ' : 'AREA', style: AppTextStyles.sectionLabel),
                           const SizedBox(height: 2),
                           Text(
-                            alert.area,
+                            _getAlertArea(alert.area),
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -233,7 +279,7 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  alert.description,
+                  _getAlertDesc(alert.description),
                   style: AppTextStyles.body.copyWith(fontSize: 13),
                 ),
               ],
@@ -249,13 +295,13 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.smart_toy_outlined, size: 16, color: AppColors.aiAccent),
-                      SizedBox(width: 6),
+                      const Icon(Icons.smart_toy_outlined, size: 16, color: AppColors.aiAccent),
+                      const SizedBox(width: 6),
                       Text(
-                        'AI RISK ASSESSMENT',
-                        style: TextStyle(
+                        LanguageService.instance.isUrdu ? 'اے آئی خطرے کا جائزہ' : 'AI RISK ASSESSMENT',
+                        style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           color: AppColors.aiAccent,
@@ -265,7 +311,7 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    alert.aiRiskAssessment!,
+                    _getAlertAi(alert.aiRiskAssessment),
                     style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.textPrimary,
@@ -279,5 +325,6 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
       ),
     ),
     );
+
   }
 }

@@ -8,6 +8,12 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
+      fontFamilyFallback: const [
+        'Noto Nastaliq Urdu',
+        'Noto Sans Arabic',
+        'Arial',
+        'sans-serif',
+      ],
       scaffoldBackgroundColor: AppColors.background,
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,

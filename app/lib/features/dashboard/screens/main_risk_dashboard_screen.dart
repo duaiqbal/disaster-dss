@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/localization/app_translations.dart';
+import '../../../core/localization/language_service.dart';
 import '../../../core/models/weather_data.dart';
 import '../../../core/models/household_risk.dart';
 import '../../../core/models/official_alert.dart';
@@ -43,13 +44,15 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
   CurrentConditions _conditions = CurrentConditions.defaultChitral;
   HouseholdRisk _risk = HouseholdRisk.defaultModerate;
   OfficialAlert _alert = OfficialAlert.warningFromPMD;
-  String _aiRecommendation =
-      'Rainfall is increasing while your household is near a steep slope. Review your evacuation route and keep essential documents ready.';
+  String get _aiRecommendationDefault => Tr.t('ai_recommendation_text');
+  late String _aiRecommendation;
+
   List<DailyForecast> _forecasts = DailyForecast.sample7Day;
 
   @override
   void initState() {
     super.initState();
+    _aiRecommendation = _aiRecommendationDefault;
     _repository = widget.repository ?? DisasterRepository();
     _loadDashboardData();
   }
@@ -248,8 +251,8 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
               ],
             ),
             alignment: Alignment.center,
-            child: const Text(
-              'HA',
+            child: Text(
+              LanguageService.instance.isUrdu ? 'ح ا' : 'HA',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,

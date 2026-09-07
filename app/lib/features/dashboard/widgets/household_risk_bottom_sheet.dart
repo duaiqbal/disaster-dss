@@ -2,12 +2,26 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/localization/app_translations.dart';
+import '../../../core/localization/language_service.dart';
 import '../../../core/models/household_risk.dart';
 
 class HouseholdRiskBottomSheet extends StatelessWidget {
   final HouseholdRisk risk;
 
   const HouseholdRiskBottomSheet({super.key, required this.risk});
+
+  String _localizeProximity(String val) {
+    if (!LanguageService.instance.isUrdu) return val;
+    if (val.toLowerCase().contains('near')) return 'قریب';
+    if (val.toLowerCase().contains('close')) return 'انتہائی قریب';
+    if (val.toLowerCase().contains('far') || val.toLowerCase().contains('distanc')) return 'دور';
+    return val;
+  }
+
+  String _localizeExplanation(String exp) {
+    if (!LanguageService.instance.isUrdu) return exp;
+    return 'چترال میں آپ کے مقام، ڈی ای ایم ڈیٹا کے تحت کھڑی ڈھلوان اور دریا کی قربت کے تجزیے سے معتدل خطرے کا تعین کیا گیا ہے۔';
+  }
 
   static void show(BuildContext context, HouseholdRisk risk) {
     showModalBottomSheet(
@@ -110,53 +124,53 @@ class HouseholdRiskBottomSheet extends StatelessWidget {
               const SizedBox(height: 16),
               _buildFactorRow(
                 icon: Icons.home_outlined,
-                title: 'House Construction',
-                subtitle: 'Brick / masonry',
-                badgeText: 'Moderate',
+                title: Tr.t('factor_house_const'),
+                subtitle: Tr.t('factor_house_const_sub'),
+                badgeText: Tr.t('badge_moderate'),
                 badgeColor: AppColors.primary,
                 badgeBg: AppColors.primaryLight,
               ),
               _buildFactorRow(
                 icon: Icons.waves,
-                title: 'River Proximity',
-                subtitle: risk.riverProximity,
-                badgeText: 'High',
+                title: Tr.t('factor_river'),
+                subtitle: _localizeProximity(risk.riverProximity),
+                badgeText: Tr.t('badge_high'),
                 badgeColor: AppColors.riskHigh,
                 badgeBg: AppColors.riskHighBg,
               ),
               _buildFactorRow(
                 icon: Icons.landscape_outlined,
-                title: 'Slope Proximity',
-                subtitle: risk.slopeProximity,
-                badgeText: 'High',
+                title: Tr.t('factor_slope'),
+                subtitle: _localizeProximity(risk.slopeProximity),
+                badgeText: Tr.t('badge_high'),
                 badgeColor: AppColors.riskHigh,
                 badgeBg: AppColors.riskHighBg,
               ),
               _buildFactorRow(
                 icon: Icons.people_outline,
-                title: 'Vulnerable Members',
-                subtitle: '1 child',
-                badgeText: 'Moderate',
+                title: Tr.t('factor_vulnerable'),
+                subtitle: Tr.t('factor_vulnerable_sub'),
+                badgeText: Tr.t('badge_moderate'),
                 badgeColor: AppColors.primary,
                 badgeBg: AppColors.primaryLight,
               ),
               _buildFactorRow(
                 icon: Icons.pets_outlined,
-                title: 'Livestock',
-                subtitle: 'Yes',
-                badgeText: 'Low',
+                title: Tr.t('factor_livestock'),
+                subtitle: Tr.t('factor_livestock_sub'),
+                badgeText: Tr.t('badge_low'),
                 badgeColor: AppColors.riskLow,
                 badgeBg: AppColors.riskLowBg,
               ),
               _buildFactorRow(
                 icon: Icons.directions_car_outlined,
-                title: 'Transport Access',
-                subtitle: 'Limited',
-                badgeText: 'Moderate',
+                title: Tr.t('factor_transport'),
+                subtitle: Tr.t('factor_transport_sub'),
+                badgeText: Tr.t('badge_moderate'),
                 badgeColor: AppColors.primary,
                 badgeBg: AppColors.primaryLight,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -176,7 +190,7 @@ class HouseholdRiskBottomSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      risk.explanation,
+                      _localizeExplanation(risk.explanation),
                       style: AppTextStyles.body.copyWith(fontSize: 13, height: 1.4),
                     ),
                   ],

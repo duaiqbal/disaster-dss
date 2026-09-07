@@ -3,6 +3,7 @@ import '../../core/models/weather_data.dart';
 import '../../core/services/disaster_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/localization/app_translations.dart';
 import '../simulator/decision_simulator_screen.dart';
 
 class ForecastScreen extends StatefulWidget {
@@ -24,9 +25,11 @@ class _ForecastScreenState extends State<ForecastScreen> {
   }
 
   Future<void> _load() async {
+    setState(() => _loading = true);
+    final repo = DisasterRepository();
     final results = await Future.wait([
-      DisasterRepository().getCurrentConditions(),
-      DisasterRepository().get7DayForecast(),
+      repo.getCurrentConditions(),
+      repo.getDailyForecast(days: 7),
     ]);
     if (mounted) {
       setState(() {
@@ -53,9 +56,9 @@ class _ForecastScreenState extends State<ForecastScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Chitral, Pakistan',
+                Text(Tr.t('location_chitral_pk'),
                     style: AppTextStyles.cardTitle.copyWith(fontSize: 15)),
-                Text('Forecast',
+                Text(Tr.t('forecast_label'),
                     style: AppTextStyles.caption.copyWith(
                         color: AppColors.textMuted, fontSize: 11)),
               ],
@@ -70,6 +73,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_forecast',
         backgroundColor: AppColors.primary,
         mini: true,
         onPressed: () => Navigator.push(
@@ -132,7 +136,7 @@ class _CurrentConditionsCard extends StatelessWidget {
                   Text(current.condition,
                       style: AppTextStyles.body.copyWith(
                           color: AppColors.textSecondary)),
-                  Text('Feels like ${(current.tempC + 1).toStringAsFixed(0)}°C',
+                  Text('${Tr.t('feels_like')} ${(current.tempC + 1).toStringAsFixed(0)}°C',
                       style: AppTextStyles.caption.copyWith(
                           color: AppColors.textMuted)),
                 ],
@@ -143,10 +147,10 @@ class _CurrentConditionsCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _ConditionPill('💧', '${current.humidityPercent}%', 'Humidity'),
-              _ConditionPill('💨', '${current.windKph}km/h', 'Wind'),
-              _ConditionPill('🌧', '${current.rainProbabilityPercent}%', 'Rain'),
-              _ConditionPill('☀️', 'Low', 'UV'),
+              _ConditionPill('💧', '${current.humidityPercent}%', Tr.t('humidity')),
+              _ConditionPill('💨', '${current.windKph}km/h', Tr.t('wind')),
+              _ConditionPill('🌧', '${current.rainProbabilityPercent}%', Tr.t('rain')),
+              _ConditionPill('☀️', Tr.t('uv_low'), Tr.t('uv')),
             ],
           ),
         ],
@@ -178,8 +182,8 @@ class _ConditionPill extends StatelessWidget {
 
 // ── Hourly forecast card ───────────────────────────────────────────────────
 class _HourlyForecastCard extends StatelessWidget {
-  static const _hourly = [
-    ('Now', '🌤', '24°'),
+  static List<(String, String, String)> get _hourly => [
+    (Tr.t('now_label'), '🌤', '24°'),
     ('6 PM', '🌥', '22°'),
     ('7 PM', '☁️', '21°'),
     ('8 PM', '☁️', '20°'),
@@ -198,14 +202,14 @@ class _HourlyForecastCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Hourly Forecast', style: AppTextStyles.sectionLabel),
+          Text(Tr.t('hourly_forecast'), style: AppTextStyles.sectionLabel),
           const SizedBox(height: 14),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children: _hourly.map((h) {
                 final (time, icon, temp) = h;
-                final isNow = time == 'Now';
+                final isNow = time == Tr.t('now_label');
                 return Container(
                   margin: const EdgeInsets.only(right: 12),
                   padding: const EdgeInsets.symmetric(
@@ -260,7 +264,7 @@ class _RiskRelevantCard extends StatelessWidget {
               const Icon(Icons.warning_amber_outlined,
                   color: AppColors.primary, size: 18),
               const SizedBox(width: 8),
-              Text('Risk-relevant weather',
+              Text(Tr.t('risk_relevant_weather'),
                   style: AppTextStyles.cardTitle.copyWith(
                       color: AppColors.primary, fontSize: 14)),
             ],
@@ -276,13 +280,13 @@ class _RiskRelevantCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _ChainNode('🌧', 'Rainfall', false),
+              _ChainNode('🌧', Tr.t('rainfall_chain_label'), false),
               const Icon(Icons.arrow_forward,
                   color: AppColors.textMuted, size: 14),
-              _ChainNode('🏔', 'Slope\nsaturation', false),
+              _ChainNode('🏔', Tr.t('slope_chain_label'), false),
               const Icon(Icons.arrow_forward,
                   color: AppColors.textMuted, size: 14),
-              _ChainNode('⚠️', 'Landslide\npotential', true),
+              _ChainNode('⚠️', Tr.t('landslide_chain_label'), true),
             ],
           ),
         ],
@@ -352,11 +356,11 @@ class _DecisionSimCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Explore Your Options',
+                Text(Tr.t('explore_options'),
                     style: AppTextStyles.cardTitle.copyWith(fontSize: 14)),
                 const SizedBox(height: 4),
                 Text(
-                  'Compare Evacuate Now with Wait & Monitor based on your current risk conditions.',
+                  Tr.t('explore_options_sub'),
                   style: AppTextStyles.caption.copyWith(
                       color: AppColors.textSecondary, height: 1.4),
                 ),
@@ -376,7 +380,7 @@ class _DecisionSimCard extends StatelessWidget {
                       MaterialPageRoute(
                           builder: (_) => const DecisionSimulatorScreen()),
                     ),
-                    child: const Text('Run Decision Simulation'),
+                    child: Text(Tr.t('run_decision_simulation')),
                   ),
                 ),
               ],
@@ -393,10 +397,19 @@ class _SevenDayCard extends StatelessWidget {
   final List<DailyForecast> forecast;
   const _SevenDayCard({required this.forecast});
 
-  static const _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  static List<String> get _dayNames => [
+    Tr.t('day_mon'),
+    Tr.t('day_tue'),
+    Tr.t('day_wed'),
+    Tr.t('day_thu'),
+    Tr.t('day_fri'),
+    Tr.t('day_sat'),
+    Tr.t('day_sun'),
+  ];
 
   @override
   Widget build(BuildContext context) {
+    final dayNames = _dayNames;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -407,7 +420,7 @@ class _SevenDayCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('7-Day Forecast', style: AppTextStyles.sectionLabel),
+          Text(Tr.t('seven_day_forecast_label'), style: AppTextStyles.sectionLabel),
           const SizedBox(height: 14),
           ...forecast.asMap().entries.map((e) {
             final i = e.key;
@@ -418,9 +431,9 @@ class _SevenDayCard extends StatelessWidget {
               child: Row(
                 children: [
                   SizedBox(
-                    width: 40,
+                    width: 44,
                     child: Text(
-                      i < _dayNames.length ? _dayNames[i] : 'Day ${i + 1}',
+                      i < dayNames.length ? dayNames[i] : 'Day ${i + 1}',
                       style: AppTextStyles.body.copyWith(
                           color: AppColors.textSecondary, fontSize: 14),
                     ),

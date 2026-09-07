@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/localization/app_translations.dart';
 import '../navigation/main_navigation_shell.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
@@ -59,15 +60,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: const Icon(Icons.shield_outlined, color: Colors.teal, size: 32),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Climate Risk Assistant',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              Text(
+                Tr.t('app_title'),
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
-              const Text(
-                'Explainable AI for climate hazard risk and preparedness',
+              Text(
+                Tr.t('app_subtitle'),
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.black54),
+                style: const TextStyle(color: Colors.black54),
               ),
               const SizedBox(height: 24),
               Container(
@@ -95,21 +97,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                     ),
                     const SizedBox(height: 20),
-                    const Text('Email', style: TextStyle(fontWeight: FontWeight.w600)),
+                    Text(Tr.t('email'), style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        hintText: 'name@example.com',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        hintText: Tr.t('email_hint'),
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Password', style: TextStyle(fontWeight: FontWeight.w600)),
+                        Text(Tr.t('password'), style: const TextStyle(fontWeight: FontWeight.w600)),
                         TextButton(
                           onPressed: () {
                             Navigator.of(context).push(
@@ -124,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             );
                           },
                           style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                          child: const Text('Forgot password?'),
+                          child: Text(Tr.t('forgot_password')),
                         ),
                       ],
                     ),
@@ -158,12 +160,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Row(
+                            : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text('Log In'),
-                                  SizedBox(width: 6),
-                                  Icon(Icons.arrow_forward, size: 18),
+                                  Text(Tr.t('log_in_btn')),
                                 ],
                               ),
                       ),
@@ -206,7 +206,7 @@ class _AuthTabSwitch extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 10),
               alignment: Alignment.center,
               child: Text(
-                'Login',
+                Tr.t('login'),
                 style: TextStyle(
                   color: activeTab == _AuthTab.login ? Colors.teal[700] : Colors.black54,
                   fontWeight: FontWeight.w600,
@@ -221,9 +221,9 @@ class _AuthTabSwitch extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 alignment: Alignment.center,
-                child: const Text(
-                  'Create account',
-                  style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
+                child: Text(
+                  Tr.t('create_account'),
+                  style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
                 ),
               ),
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/localization/app_translations.dart';
 import '../chat/chat_screen.dart';
 import '../profile/emergency_contacts_screen.dart';
 
@@ -10,114 +11,114 @@ import '../profile/emergency_contacts_screen.dart';
 class SafetyHubScreen extends StatelessWidget {
   const SafetyHubScreen({super.key});
 
-  static const _guides = [
+  List<_GuideEntry> get _guides => [
     _GuideEntry(
       emoji: '🌊',
-      title: 'Flash Flood & River Rise',
-      subtitle: 'What to do when flood risk increases.',
+      title: Tr.t('guide_flood_title'),
+      subtitle: Tr.t('guide_flood_sub'),
       doItems: [
-        'Move to higher ground early.',
-        'Stay away from rivers, streams, and drainage channels.',
-        'Follow official evacuation instructions.',
-        'Keep your phone charged and emergency contacts accessible.',
+        Tr.t('flood_do_1'),
+        Tr.t('flood_do_2'),
+        Tr.t('flood_do_3'),
+        Tr.t('flood_do_4'),
       ],
       doNotItems: [
-        'Do not walk or drive through floodwater.',
-        'Do not cross bridges with fast-moving water.',
-        'Do not wait until water reaches your home to evacuate.',
+        Tr.t('flood_dont_1'),
+        Tr.t('flood_dont_2'),
+        Tr.t('flood_dont_3'),
       ],
       watchForItems: [
-        'Rapidly rising water',
-        'Overflowing drains',
-        'Sudden changes in river level',
-        'Official evacuation warnings',
+        Tr.t('flood_watch_1'),
+        Tr.t('flood_watch_2'),
+        Tr.t('flood_watch_3'),
+        Tr.t('flood_watch_4'),
       ],
     ),
     _GuideEntry(
       emoji: '⛰️',
-      title: 'Slope Stability & Debris Flow',
-      subtitle: 'What to do when landslide risk increases.',
+      title: Tr.t('guide_slope_title'),
+      subtitle: Tr.t('guide_slope_sub'),
       doItems: [
-        'Evacuate immediately if you hear rumbling or cracking sounds.',
-        'Move perpendicular to the flow path, not downhill.',
-        'Alert neighbours and report to local authorities.',
-        'Move livestock to safer ground.',
+        Tr.t('slope_do_1'),
+        Tr.t('slope_do_2'),
+        Tr.t('slope_do_3'),
+        Tr.t('slope_do_4'),
       ],
       doNotItems: [
-        'Do not shelter in valleys or near hillsides.',
-        'Do not return until authorities declare it safe.',
-        'Do not cross areas with fresh debris.',
+        Tr.t('slope_dont_1'),
+        Tr.t('slope_dont_2'),
+        Tr.t('slope_dont_3'),
       ],
       watchForItems: [
-        'Cracks or bulges in the ground',
-        'Sudden increase in stream turbidity',
-        'Trees leaning on slopes',
-        'Unusual sounds from hillsides',
+        Tr.t('slope_watch_1'),
+        Tr.t('slope_watch_2'),
+        Tr.t('slope_watch_3'),
+        Tr.t('slope_watch_4'),
       ],
     ),
     _GuideEntry(
       emoji: '☀️',
-      title: 'Extreme Heat Waves',
-      subtitle: 'Staying safe during prolonged high temperatures.',
+      title: Tr.t('guide_heat_title'),
+      subtitle: Tr.t('guide_heat_sub'),
       doItems: [
-        'Stay indoors during peak heat hours (11am–3pm).',
-        'Drink plenty of water throughout the day.',
-        'Check on elderly neighbours and vulnerable family members.',
-        'Wear light, loose-fitting clothing.',
+        Tr.t('heat_do_1'),
+        Tr.t('heat_do_2'),
+        Tr.t('heat_do_3'),
+        Tr.t('heat_do_4'),
       ],
       doNotItems: [
-        'Do not leave children or animals in parked vehicles.',
-        'Do not do strenuous activity outdoors during peak heat.',
-        'Do not ignore signs of heat stroke (confusion, no sweating).',
+        Tr.t('heat_dont_1'),
+        Tr.t('heat_dont_2'),
+        Tr.t('heat_dont_3'),
       ],
       watchForItems: [
-        'Unusual thirst and dark urine',
-        'Dizziness or fainting',
-        'Official heat warnings from PMD',
-        'Livestock distress',
+        Tr.t('heat_watch_1'),
+        Tr.t('heat_watch_2'),
+        Tr.t('heat_watch_3'),
+        Tr.t('heat_watch_4'),
       ],
     ),
     _GuideEntry(
       emoji: '💨',
-      title: 'Wind & Heavy Precipitation',
-      subtitle: 'Preparing for strong winds and storms.',
+      title: Tr.t('guide_wind_title'),
+      subtitle: Tr.t('guide_wind_sub'),
       doItems: [
-        'Secure loose objects outdoors before the storm.',
-        'Stay indoors away from windows during high winds.',
-        'Keep gutters and drains clear to prevent waterlogging.',
-        'Have a battery-powered radio for official updates.',
+        Tr.t('wind_do_1'),
+        Tr.t('wind_do_2'),
+        Tr.t('wind_do_3'),
+        Tr.t('wind_do_4'),
       ],
       doNotItems: [
-        'Do not shelter under trees during lightning.',
-        'Do not attempt to drive in reduced-visibility conditions.',
-        'Do not use candles near flammable materials during power cuts.',
+        Tr.t('wind_dont_1'),
+        Tr.t('wind_dont_2'),
+        Tr.t('wind_dont_3'),
       ],
       watchForItems: [
-        'PMD severe weather advisories',
-        'Rapidly darkening skies',
-        'Flash flood risk after heavy rain',
-        'Damaged power lines',
+        Tr.t('wind_watch_1'),
+        Tr.t('wind_watch_2'),
+        Tr.t('wind_watch_3'),
+        Tr.t('wind_watch_4'),
       ],
     ),
     _GuideEntry(
       emoji: '🌫️',
-      title: 'Dust & Air Quality',
-      subtitle: 'How to reduce exposure when air quality deteriorates.',
+      title: Tr.t('guide_dust_title'),
+      subtitle: Tr.t('guide_dust_sub'),
       doItems: [
-        'Stay indoors when AQI is poor.',
-        'Keep windows and doors closed.',
-        'Avoid unnecessary outdoor activity.',
-        'Drink water regularly.',
+        Tr.t('dust_do_1'),
+        Tr.t('dust_do_2'),
+        Tr.t('dust_do_3'),
+        Tr.t('dust_do_4'),
       ],
       doNotItems: [
-        'Do not engage in strenuous outdoor activity.',
-        'Do not keep ventilation open during dust storms.',
-        'Do not ignore respiratory symptoms.',
+        Tr.t('dust_dont_1'),
+        Tr.t('dust_dont_2'),
+        Tr.t('dust_dont_3'),
       ],
       watchForItems: [
-        'AQI Levels (PM2.5 deterioration)',
-        'Reduced surface visibility',
-        'Official dust & air quality advisories',
+        Tr.t('dust_watch_1'),
+        Tr.t('dust_watch_2'),
+        Tr.t('dust_watch_3'),
       ],
     ),
   ];
@@ -132,10 +133,11 @@ class SafetyHubScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         leading: const BackButton(color: AppColors.textPrimary),
-        title: Text('Safety Hub',
+        title: Text(Tr.t('safety_hub_title'),
             style: AppTextStyles.cardTitle.copyWith(color: AppColors.primary)),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_safety',
         backgroundColor: AppColors.primary,
         onPressed: () => Navigator.push(
           context,
@@ -147,12 +149,12 @@ class SafetyHubScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           // Emergency Safe Bag section
-          Text('Emergency Safe Bag', style: AppTextStyles.sectionLabel),
+          Text(Tr.t('safety_bag_section'), style: AppTextStyles.sectionLabel),
           const SizedBox(height: 10),
           _HubCard(
             icon: Icons.backpack_outlined,
-            title: 'Emergency Safe Bag Checklist',
-            subtitle: 'Essential items to keep ready for rapid evacuation.',
+            title: Tr.t('safety_bag_title'),
+            subtitle: Tr.t('safety_bag_subtitle'),
             onTap: () => showModalBottomSheet(
               context: context,
               isScrollControlled: true,
@@ -164,7 +166,7 @@ class SafetyHubScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Safety guides section
-          Text('Safety Guides', style: AppTextStyles.sectionLabel),
+          Text(Tr.t('safety_guides_section'), style: AppTextStyles.sectionLabel),
           const SizedBox(height: 10),
           ..._guides.map((g) => Padding(
                 padding: const EdgeInsets.only(bottom: 10),
@@ -197,7 +199,7 @@ class SafetyHubScreen extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Safety information is sourced from official NDMA and PMD guidelines.',
+                    Tr.t('safety_info_note'),
                     style: AppTextStyles.caption.copyWith(
                         color: AppColors.textSecondary, height: 1.4),
                   ),
@@ -287,20 +289,20 @@ class _SafeBagBottomSheet extends StatefulWidget {
 }
 
 class _SafeBagBottomSheetState extends State<_SafeBagBottomSheet> {
-  static const _items = [
-    'Drinking water',
-    'Ready-to-eat food',
-    'First-aid supplies',
-    'Essential medicines',
-    'Flashlight',
-    'Extra batteries',
-    'Power bank',
-    'Copies of important documents',
-    'Emergency contact information',
-    'Basic hygiene supplies',
-    'Warm/light clothing',
-    'Whistle',
-    'Local map',
+  List<String> get _items => [
+    Tr.t('bag_water'),
+    Tr.t('bag_food'),
+    Tr.t('bag_first_aid'),
+    Tr.t('bag_medicines'),
+    Tr.t('bag_flashlight'),
+    Tr.t('bag_batteries'),
+    Tr.t('bag_power_bank'),
+    Tr.t('bag_documents'),
+    Tr.t('bag_contacts'),
+    Tr.t('bag_hygiene'),
+    Tr.t('bag_clothing'),
+    Tr.t('bag_whistle'),
+    Tr.t('bag_map'),
   ];
 
   late final List<bool> _checked;
@@ -308,7 +310,7 @@ class _SafeBagBottomSheetState extends State<_SafeBagBottomSheet> {
   @override
   void initState() {
     super.initState();
-    _checked = List.filled(_items.length, false);
+    _checked = List.filled(13, false);
   }
 
   @override
@@ -331,14 +333,14 @@ class _SafeBagBottomSheetState extends State<_SafeBagBottomSheet> {
                     height: 4,
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: AppColors.border,
-                      borderRadius: BorderRadius.circular(2),
+                       color: AppColors.border,
+                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                   Row(
                     children: [
                       Expanded(
-                          child: Text('Emergency Safe Bag',
+                          child: Text(Tr.t('safety_bag_title'),
                               style: AppTextStyles.cardTitle.copyWith(
                                   fontSize: 18))),
                       IconButton(
@@ -349,7 +351,7 @@ class _SafeBagBottomSheetState extends State<_SafeBagBottomSheet> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Essential items to keep ready for rapid evacuation.',
+                    Tr.t('safety_bag_subtitle'),
                     style: AppTextStyles.body.copyWith(
                         color: AppColors.textSecondary),
                   ),
@@ -397,7 +399,7 @@ class _SafeBagBottomSheetState extends State<_SafeBagBottomSheet> {
                       size: 14, color: AppColors.primary),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text('Keep the bag somewhere easy to access.',
+                    child: Text(Tr.t('safety_bag_hint'),
                         style: AppTextStyles.caption.copyWith(
                             color: AppColors.textSecondary)),
                   ),
@@ -421,7 +423,7 @@ class _SafeBagBottomSheetState extends State<_SafeBagBottomSheet> {
                             borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Done'),
+                      child: Text(Tr.t('done')),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -436,12 +438,13 @@ class _SafeBagBottomSheetState extends State<_SafeBagBottomSheet> {
                             borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Close'),
+                      child: Text(Tr.t('close')),
                     ),
                   ),
                 ],
               ),
             ),
+
             const SafeArea(top: false, child: SizedBox(height: 8)),
           ],
         );
@@ -532,21 +535,21 @@ class _SafetyGuideBottomSheet extends StatelessWidget {
                 children: [
                   _GuideSection(
                     icon: Icons.check_circle_outline,
-                    title: 'Do',
+                    title: Tr.t('guide_do'),
                     color: AppColors.riskLow,
                     items: guide.doItems,
                   ),
                   const SizedBox(height: 12),
                   _GuideSection(
                     icon: Icons.warning_amber_outlined,
-                    title: 'Do Not',
+                    title: Tr.t('guide_do_not'),
                     color: AppColors.riskHigh,
                     items: guide.doNotItems,
                   ),
                   const SizedBox(height: 12),
                   _GuideSection(
                     icon: Icons.remove_red_eye_outlined,
-                    title: 'Watch For',
+                    title: Tr.t('guide_watch_for'),
                     color: AppColors.primary,
                     items: guide.watchForItems,
                   ),
@@ -570,7 +573,7 @@ class _SafetyGuideBottomSheet extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12)),
                       ),
                       icon: const Icon(Icons.contact_phone_outlined, size: 16),
-                      label: const Text('View Emergency Contacts'),
+                      label: Text(Tr.t('view_emergency_contacts')),
                       onPressed: () {
                         Navigator.pop(ctx);
                         Navigator.push(
@@ -593,13 +596,14 @@ class _SafetyGuideBottomSheet extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12)),
                       ),
                       icon: const Icon(Icons.close, size: 16),
-                      label: const Text('Close'),
+                      label: Text(Tr.t('close')),
                       onPressed: () => Navigator.pop(ctx),
                     ),
                   ),
                 ],
               ),
             ),
+
             const SafeArea(top: false, child: SizedBox(height: 8)),
           ],
         );

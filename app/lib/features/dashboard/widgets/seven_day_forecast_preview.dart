@@ -71,7 +71,7 @@ class SevenDayForecastPreview extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            forecast.dayName,
+            Tr.dayName(forecast.dayName),
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,

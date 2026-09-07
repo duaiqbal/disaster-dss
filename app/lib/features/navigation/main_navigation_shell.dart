@@ -91,6 +91,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         children: screens,
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_main',
         onPressed: _openAiAssistant,
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,

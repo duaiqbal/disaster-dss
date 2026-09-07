@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/localization/app_translations.dart';
 import '../chat/chat_screen.dart';
 
 class FeedbackScreen extends StatefulWidget {
@@ -18,13 +19,13 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
   // What made it difficult (multi-select)
   final Set<String> _difficulties = {};
-  static const _difficultyOptions = [
-    'Too expensive',
-    'Not enough time',
-    'Not clear',
-    'No transport',
-    'Already prepared',
-    'Other',
+  List<String> get _difficultyOptions => [
+    Tr.t('feedback_d_expensive'),
+    Tr.t('feedback_d_time'),
+    Tr.t('feedback_d_unclear'),
+    Tr.t('feedback_d_transport'),
+    Tr.t('feedback_d_prepared'),
+    Tr.t('feedback_d_other'),
   ];
 
   bool _submitting = false;
@@ -61,6 +62,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         leading: const BackButton(color: AppColors.textPrimary),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_feedback',
         backgroundColor: AppColors.primary,
         onPressed: () => Navigator.push(
           context,
@@ -73,11 +75,11 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Help improve your\nguidance',
+            Text(Tr.t('feedback_title'),
                 style: AppTextStyles.screenHeader.copyWith(fontSize: 26)),
             const SizedBox(height: 8),
             Text(
-              'Your feedback helps evaluate and improve the decision-support system.',
+              Tr.t('feedback_subtitle'),
               style: AppTextStyles.body.copyWith(
                   color: AppColors.textSecondary, height: 1.5),
             ),
@@ -88,7 +90,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Was this recommendation useful?',
+                  Text(Tr.t('feedback_q1'),
                       style: AppTextStyles.cardTitle.copyWith(fontSize: 15)),
                   const SizedBox(height: 14),
                   Row(
@@ -96,7 +98,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                       Expanded(
                         child: _ThumbBtn(
                           icon: Icons.thumb_up_outlined,
-                          label: 'Helpful',
+                          label: Tr.t('feedback_helpful'),
                           active: _helpful == true,
                           onTap: () => setState(() => _helpful = true),
                         ),
@@ -105,7 +107,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                       Expanded(
                         child: _ThumbBtn(
                           icon: Icons.thumb_down_outlined,
-                          label: 'Not helpful',
+                          label: Tr.t('feedback_not_helpful'),
                           active: _helpful == false,
                           onTap: () => setState(() => _helpful = false),
                         ),
@@ -122,13 +124,19 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Did you follow the recommendation?',
+                  Text(Tr.t('feedback_q2'),
                       style: AppTextStyles.cardTitle.copyWith(fontSize: 15)),
                   const SizedBox(height: 14),
-                  ...['Yes', 'Partially', 'No'].map((opt) {
-                    final selected = _followedOption == opt;
+                  ...[
+                    (Tr.t('feedback_yes'), 'Yes'),
+                    (Tr.t('feedback_partially'), 'Partially'),
+                    (Tr.t('feedback_no'), 'No'),
+                  ].map((pair) {
+                    final label = pair.$1;
+                    final optKey = pair.$2;
+                    final selected = _followedOption == optKey;
                     return GestureDetector(
-                      onTap: () => setState(() => _followedOption = opt),
+                      onTap: () => setState(() => _followedOption = optKey),
                       child: Container(
                         width: double.infinity,
                         margin: const EdgeInsets.only(bottom: 8),
@@ -144,7 +152,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                           ),
                         ),
                         child: Center(
-                          child: Text(opt,
+                          child: Text(label,
                               style: AppTextStyles.body.copyWith(
                                   color: selected
                                       ? AppColors.primary
@@ -166,10 +174,10 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('What made it difficult?',
+                  Text(Tr.t('feedback_q3'),
                       style: AppTextStyles.cardTitle.copyWith(fontSize: 15)),
                   const SizedBox(height: 4),
-                  Text('Select all that apply.',
+                  Text(Tr.t('feedback_q3_sub'),
                       style: AppTextStyles.caption.copyWith(
                           color: AppColors.textMuted)),
                   const SizedBox(height: 12),
@@ -233,7 +241,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                         child: CircularProgressIndicator(
                             strokeWidth: 2, color: Colors.white))
                     : const Icon(Icons.send_outlined, size: 16),
-                label: Text(_submitting ? 'Submitting...' : 'Submit feedback'),
+                label: Text(_submitting ? Tr.t('feedback_submitting') : Tr.t('feedback_submit')),
                 onPressed: _submitting ? null : _submit,
               ),
             ),
@@ -252,7 +260,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Feedback can be stored locally and later used to evaluate retrieval, ranking, and rule-confidence performance. Prototype learning data may include simulated or pilot feedback.',
+                      Tr.t('feedback_disclaimer'),
                       style: AppTextStyles.caption.copyWith(
                           color: AppColors.textMuted,
                           fontSize: 11,
@@ -361,18 +369,18 @@ class _FeedbackSuccessSheet extends StatelessWidget {
                 color: AppColors.primary, size: 28),
           ),
           const SizedBox(height: 16),
-          Text('Feedback Submitted',
+          Text(Tr.t('feedback_success_title'),
               style: AppTextStyles.cardTitle.copyWith(fontSize: 18)),
           const SizedBox(height: 8),
           Text(
-            'Thanks for helping us improve your climate risk experience.',
+            Tr.t('feedback_success_sub'),
             style: AppTextStyles.body.copyWith(
                 color: AppColors.textSecondary, height: 1.5),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 6),
           Text(
-            'Your feedback helps improve future recommendations and decision support.',
+            Tr.t('feedback_success_note'),
             style: AppTextStyles.caption.copyWith(
                 color: AppColors.textMuted, height: 1.4),
             textAlign: TextAlign.center,
@@ -389,7 +397,7 @@ class _FeedbackSuccessSheet extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12)),
               ),
               onPressed: onDone,
-              child: const Text('Done'),
+              child: Text(Tr.t('done')),
             ),
           ),
           const SizedBox(height: 8),

@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../core/local_db/local_db.dart';
+import '../../core/localization/app_translations.dart';
+import '../../core/localization/language_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../chat/chat_screen.dart';
@@ -35,14 +37,21 @@ class MapScreen extends StatefulWidget {
   State<MapScreen> createState() => _MapScreenState();
 }
 
+class _MapFilter {
+  final String id;
+  final String labelKey;
+  final IconData icon;
+  const _MapFilter(this.id, this.labelKey, this.icon);
+}
+
 class _MapScreenState extends State<MapScreen> {
-  final List<String> _filterChips = [
-    'Landslide',
-    'Flood',
-    'Rainfall',
-    'Terrain',
+  static const _filters = [
+    _MapFilter('landslide', 'map_filter_landslide', Icons.landscape),
+    _MapFilter('flood', 'map_filter_flood', Icons.water),
+    _MapFilter('rainfall', 'map_filter_rainfall', Icons.water_drop_outlined),
+    _MapFilter('terrain', 'map_filter_terrain', Icons.terrain),
   ];
-  String _activeFilter = 'Landslide';
+  String _activeFilterId = 'landslide';
   _HazardInfo? _hazardInfo;
   bool _loading = false;
   bool _bottomSheetVisible = true;
@@ -107,7 +116,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   String get _hazardLabel {
-    return 'High Landslide Risk Zone';
+    return Tr.t('map_sheet_zone_title');
   }
 
   @override
@@ -229,14 +238,14 @@ class _MapScreenState extends State<MapScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Chitral, Pakistan',
+                  Tr.t('location_chitral_pk'),
                   style: AppTextStyles.cardTitle.copyWith(
                     color: AppColors.primary,
                     fontSize: 16,
                   ),
                 ),
                 Text(
-                  'Hazard Map',
+                  Tr.t('tab_map'),
                   style: AppTextStyles.caption.copyWith(
                     color: AppColors.textMuted,
                     fontSize: 12,
@@ -257,12 +266,12 @@ class _MapScreenState extends State<MapScreen> {
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
-        children: _filterChips.map((chip) {
-          final isActive = chip == _activeFilter;
+        children: _filters.map((filter) {
+          final isActive = filter.id == _activeFilterId;
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: GestureDetector(
-              onTap: () => setState(() => _activeFilter = chip),
+              onTap: () => setState(() => _activeFilterId = filter.id),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 14, vertical: 8),
@@ -284,13 +293,13 @@ class _MapScreenState extends State<MapScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      _filterIcon(chip),
+                      filter.icon,
                       size: 14,
                       color: isActive ? Colors.white : AppColors.textSecondary,
                     ),
                     const SizedBox(width: 5),
                     Text(
-                      chip,
+                      Tr.t(filter.labelKey),
                       style: AppTextStyles.caption.copyWith(
                         color: isActive
                             ? Colors.white
@@ -307,21 +316,6 @@ class _MapScreenState extends State<MapScreen> {
         }).toList(),
       ),
     );
-  }
-
-  IconData _filterIcon(String chip) {
-    switch (chip) {
-      case 'Landslide':
-        return Icons.landscape;
-      case 'Flood':
-        return Icons.water;
-      case 'Rainfall':
-        return Icons.water_drop_outlined;
-      case 'Terrain':
-        return Icons.terrain;
-      default:
-        return Icons.layers_outlined;
-    }
   }
 
   // ── Zoom controls ─────────────────────────────────────────────────────────
@@ -474,7 +468,9 @@ class _MapScreenState extends State<MapScreen> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        '${level.toUpperCase()} RISK',
+                        LanguageService.instance.isUrdu
+                            ? (isHigh ? 'زیادہ خطرہ' : 'درمیانہ خطرہ')
+                            : '${level.toUpperCase()} RISK',
                         style: AppTextStyles.caption.copyWith(
                           color: isHigh
                               ? AppColors.riskHigh
@@ -489,7 +485,7 @@ class _MapScreenState extends State<MapScreen> {
                         size: 13, color: AppColors.textMuted),
                     const SizedBox(width: 4),
                     Text(
-                      'Moderate Confidence',
+                      Tr.t('map_sheet_confidence'),
                       style: AppTextStyles.caption.copyWith(
                         color: AppColors.textMuted,
                         fontSize: 12,
@@ -525,7 +521,7 @@ class _MapScreenState extends State<MapScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Why this area is flagged',
+                        Tr.t('map_sheet_reasons'),
                         style: AppTextStyles.caption.copyWith(
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -535,18 +531,23 @@ class _MapScreenState extends State<MapScreen> {
                       const SizedBox(height: 10),
                       _flagReason(
                         icon: Icons.landscape,
-                        text:
-                            'Steep terrain (gradient > ${info.slope.toStringAsFixed(0)}°)',
+                        text: LanguageService.instance.isUrdu
+                            ? 'کھڑی ڈھلوان (ڈھلوان کا زاویہ > ${info.slope.toStringAsFixed(0)} ڈگری)'
+                            : 'Steep terrain (gradient > ${info.slope.toStringAsFixed(0)}°)',
                       ),
                       _flagReason(
                         icon: Icons.water_drop_outlined,
-                        text: 'Heavy rainfall saturation over past 72h',
+                        text: LanguageService.instance.isUrdu
+                            ? 'گزشتہ ۷۲ گھنٹوں کے دوران شدید بارش کی نمی کا دباؤ'
+                            : 'Heavy rainfall saturation over past 72h',
                       ),
                       _flagReason(
                         icon: Icons.waves,
-                        text: info.riverNearby
-                            ? 'Proximity to river channel'
-                            : 'Proximity to compromised natural drainage',
+                        text: LanguageService.instance.isUrdu
+                            ? 'متاثرہ قدرتی نکاسی آب کے بہاؤ سے قریبی فاصلہ'
+                            : (info.riverNearby
+                                ? 'Proximity to river channel'
+                                : 'Proximity to compromised natural drainage'),
                       ),
                     ],
                   ),
@@ -558,15 +559,20 @@ class _MapScreenState extends State<MapScreen> {
                 Row(
                   children: [
                     Text(
-                      'Sources: ',
+                      Tr.t('map_sheet_sources'),
                       style: AppTextStyles.caption.copyWith(
                         color: AppColors.textMuted,
                         fontSize: 12,
                       ),
                     ),
-                    _sourceTag('SRTM DEM'),
                     const SizedBox(width: 6),
-                    _sourceTag('PMD Data'),
+                    _sourceTag(LanguageService.instance.isUrdu
+                        ? 'ایس آر ٹی ایم ڈی ای ایم'
+                        : 'SRTM DEM'),
+                    const SizedBox(width: 6),
+                    _sourceTag(LanguageService.instance.isUrdu
+                        ? 'پی ایم ڈی ڈیٹا'
+                        : 'PMD Data'),
                   ],
                 ),
 
@@ -586,7 +592,7 @@ class _MapScreenState extends State<MapScreen> {
                           ),
                         ),
                         onPressed: () => _showRiskFactorSheet(context),
-                        child: const Text('View risk factors'),
+                        child: Text(Tr.t('map_view_risk_factors')),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -654,9 +660,11 @@ class _MapScreenState extends State<MapScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'High Landslide Risk Zone',
-                  style: AppTextStyles.cardTitle.copyWith(fontSize: 18),
+                Expanded(
+                  child: Text(
+                    Tr.t('map_sheet_zone_title'),
+                    style: AppTextStyles.cardTitle.copyWith(fontSize: 18),
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close, color: AppColors.textMuted),
@@ -665,7 +673,9 @@ class _MapScreenState extends State<MapScreen> {
               ],
             ),
             Text(
-              'Current risk factors for this area.',
+              LanguageService.instance.isUrdu
+                  ? 'اس علاقے کے موجودہ خطرے کے عوامل۔'
+                  : 'Current risk factors for this area.',
               style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 16),
@@ -684,7 +694,7 @@ class _MapScreenState extends State<MapScreen> {
                       const Icon(Icons.insert_chart_outlined, size: 16, color: AppColors.primary),
                       const SizedBox(width: 6),
                       Text(
-                        'Key Indicators',
+                        LanguageService.instance.isUrdu ? 'اہم اشارے' : 'Key Indicators',
                         style: AppTextStyles.caption.copyWith(
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -695,17 +705,41 @@ class _MapScreenState extends State<MapScreen> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: _indicatorBox('Landslide Risk', 'High', AppColors.riskHigh)),
+                      Expanded(
+                        child: _indicatorBox(
+                          Tr.t('map_filter_landslide'),
+                          Tr.t('risk_high'),
+                          AppColors.riskHigh,
+                        ),
+                      ),
                       const SizedBox(width: 8),
-                      Expanded(child: _indicatorBox('Rainfall', 'Heavy', AppColors.textPrimary)),
+                      Expanded(
+                        child: _indicatorBox(
+                          Tr.t('map_filter_rainfall'),
+                          LanguageService.instance.isUrdu ? 'شدید' : 'Heavy',
+                          AppColors.textPrimary,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Expanded(child: _indicatorBox('Slope Stability', 'Low', AppColors.riskHigh)),
+                      Expanded(
+                        child: _indicatorBox(
+                          LanguageService.instance.isUrdu ? 'ڈھلوان کا استحکام' : 'Slope Stability',
+                          Tr.t('risk_low'),
+                          AppColors.riskHigh,
+                        ),
+                      ),
                       const SizedBox(width: 8),
-                      Expanded(child: _indicatorBox('Road Access', 'At Risk', AppColors.primary)),
+                      Expanded(
+                        child: _indicatorBox(
+                          LanguageService.instance.isUrdu ? 'سڑک تک رسائی' : 'Road Access',
+                          LanguageService.instance.isUrdu ? 'خطرے میں' : 'At Risk',
+                          AppColors.primary,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -726,7 +760,7 @@ class _MapScreenState extends State<MapScreen> {
                       const Icon(Icons.info_outline, size: 16, color: AppColors.primary),
                       const SizedBox(width: 6),
                       Text(
-                        'Why this area is at risk',
+                        LanguageService.instance.isUrdu ? 'اس علاقے کو خطرہ کیوں ہے' : 'Why this area is at risk',
                         style: AppTextStyles.caption.copyWith(
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -736,7 +770,9 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Heavy rainfall can increase soil saturation and slope instability. Roads near steep terrain may become difficult to access.',
+                    LanguageService.instance.isUrdu
+                        ? 'شدید بارش مٹی میں نمی کے تناسب اور ڈھلوان کے عدم استحکام کو بڑھا سکتی ہے۔ کھڑی ڈھلوانوں کے قریب سڑکوں تک رسائی مشکل ہو سکتی ہے۔'
+                        : 'Heavy rainfall can increase soil saturation and slope instability. Roads near steep terrain may become difficult to access.',
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.textSecondary,
                       height: 1.4,
@@ -761,7 +797,7 @@ class _MapScreenState extends State<MapScreen> {
                       const Icon(Icons.shield_outlined, size: 16, color: AppColors.primary),
                       const SizedBox(width: 6),
                       Text(
-                        'What to do',
+                        Tr.t('what_to_do_now'),
                         style: AppTextStyles.caption.copyWith(
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -770,11 +806,20 @@ class _MapScreenState extends State<MapScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text('• Avoid unstable slopes.', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                  Text(
+                    LanguageService.instance.isUrdu ? '• غیر مستحکم ڈھلوانوں سے دور رہیں۔' : '• Avoid unstable slopes.',
+                    style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                  ),
                   const SizedBox(height: 4),
-                  Text('• Monitor official alerts.', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                  Text(
+                    LanguageService.instance.isUrdu ? '• سرکاری انتباہات پر نظر رکھیں۔' : '• Monitor official alerts.',
+                    style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                  ),
                   const SizedBox(height: 4),
-                  Text('• Keep evacuation routes ready.', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                  Text(
+                    LanguageService.instance.isUrdu ? '• انخلاء کے راستے تیار رکھیں۔' : '• Keep evacuation routes ready.',
+                    style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                  ),
                 ],
               ),
             ),
@@ -789,7 +834,7 @@ class _MapScreenState extends State<MapScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 icon: const Icon(Icons.menu_book_outlined, size: 16),
-                label: const Text('View Safety Guide'),
+                label: Text(Tr.t('view_safety_guide')),
                 onPressed: () {
                   Navigator.pop(context);
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const SafetyHubScreen()));
@@ -807,11 +852,12 @@ class _MapScreenState extends State<MapScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 icon: const Icon(Icons.close, size: 16),
-                label: const Text('Close'),
+                label: Text(Tr.t('close')),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
             const SizedBox(height: 12),
+
           ],
         ),
       ),

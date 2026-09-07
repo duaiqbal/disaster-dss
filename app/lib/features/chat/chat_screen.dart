@@ -4,6 +4,7 @@ import '../../core/rules_engine/rules_engine.dart';
 import '../../core/services/api_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/localization/app_translations.dart';
 
 class _ChatMessage {
   final String text;
@@ -36,11 +37,11 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _loading = false;
   bool _isOnline = false;
 
-  static const List<String> _suggestionChips = [
-    'Why is my risk moderate?',
-    'What should I do during heavy rain?',
-    'What should I pack?',
-    'What does this alert mean?',
+  List<String> get _suggestionChips => [
+    Tr.t('chip_why_risk'),
+    Tr.t('chip_heavy_rain'),
+    Tr.t('chip_what_pack'),
+    Tr.t('chip_alert_mean'),
   ];
 
   @override
@@ -159,14 +160,14 @@ class _ChatScreenState extends State<ChatScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Climate Assistant',
+            Tr.t('chat_title'),
             style: AppTextStyles.cardTitle.copyWith(
               color: AppColors.textPrimary,
               fontSize: 17,
             ),
           ),
           Text(
-            'Explainable AI for climate hazards and preparedness',
+            Tr.t('chat_subtitle'),
             style: AppTextStyles.caption.copyWith(
               color: AppColors.textSecondary,
               fontSize: 11,
@@ -185,8 +186,8 @@ class _ChatScreenState extends State<ChatScreen> {
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: _isOnline
-                  ? AppColors.onlineGreen.withValues(alpha: 0.4)
-                  : AppColors.textMuted.withValues(alpha: 0.3),
+                ? AppColors.onlineGreen.withValues(alpha: 0.4)
+                : AppColors.textMuted.withValues(alpha: 0.3),
             ),
           ),
           child: Row(
@@ -202,7 +203,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               const SizedBox(width: 5),
               Text(
-                _isOnline ? 'Online' : 'Offline',
+                _isOnline ? Tr.t('chat_online') : Tr.t('chat_offline'),
                 style: AppTextStyles.caption.copyWith(
                   fontWeight: FontWeight.w600,
                   color: _isOnline ? AppColors.onlineGreen : AppColors.textMuted,
@@ -226,13 +227,13 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             _contextChip(
               icon: Icons.location_on_outlined,
-              label: 'Chitral, KP',
+              label: Tr.t('chat_context_location'),
               color: AppColors.textSecondary,
             ),
             const SizedBox(width: 8),
             _contextChip(
               icon: Icons.warning_amber_rounded,
-              label: 'Context: Heavy Rainfall Alert',
+              label: Tr.t('chat_context_alert'),
               color: AppColors.riskHigh,
               bgColor: AppColors.riskHighBg,
               borderColor: AppColors.riskHighCardBorder,
@@ -325,7 +326,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ],
               ),
               child: Text(
-                'Hi. I can help you understand climate risks, official alerts, preparedness guidance, and your household risk.',
+                Tr.t('chat_greeting'),
                 style: AppTextStyles.body.copyWith(
                   color: AppColors.textPrimary,
                   height: 1.5,
@@ -455,7 +456,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Recommended next steps:',
+                              Tr.t('chat_recommended_steps'),
                               style: AppTextStyles.caption.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.textPrimary,
@@ -516,7 +517,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              'Why am I seeing this?',
+                              Tr.t('chat_xai_label'),
                               style: AppTextStyles.caption.copyWith(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w600,
@@ -656,7 +657,7 @@ class _ChatScreenState extends State<ChatScreen> {
           const SizedBox(width: 6),
           Expanded(
             child: Text(
-              'AI guidance supports decisions and does not replace official warnings or local authorities.',
+              Tr.t('chat_disclaimer'),
               style: AppTextStyles.caption.copyWith(
                 color: AppColors.textMuted,
                 fontSize: 11,
@@ -689,7 +690,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   textInputAction: TextInputAction.send,
                   onSubmitted: _loading ? null : _submitQuery,
                   decoration: InputDecoration(
-                    hintText: 'Ask about your climate risk...',
+                    hintText: Tr.t('chat_input_hint'),
                     hintStyle: AppTextStyles.body.copyWith(
                       color: AppColors.textDisabled,
                       fontSize: 14,

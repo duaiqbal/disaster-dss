@@ -47,7 +47,7 @@ class CurrentConditionsCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    conditions.condition,
+                    Tr.weatherCondition(conditions.condition),
                     style: AppTextStyles.body.copyWith(
                       color: AppColors.textSecondary,
                       fontSize: 15,

@@ -32,6 +32,9 @@ class DisasterRepository {
     return DailyForecast.sample7Day;
   }
 
+  /// Alias for daily forecast
+  Future<List<DailyForecast>> getDailyForecast({int days = 7}) => get7DayForecast();
+
   /// Calculates household risk using GIS local DB or backend
   Future<HouseholdRisk> getHouseholdRisk({double? lat, double? lng}) async {
     // Attempt backend API call first

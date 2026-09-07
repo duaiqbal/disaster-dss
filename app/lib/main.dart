@@ -22,6 +22,7 @@ class DisasterDssApp extends StatelessWidget {
           title: 'Disaster DSS',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
+          locale: LanguageService.instance.locale,
           builder: (context, child) {
             return Directionality(
               textDirection: LanguageService.instance.isRtl

@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import '../../core/localization/app_translations.dart';
+import '../../core/localization/language_service.dart';
 import '../../core/services/api_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -57,7 +59,7 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
         elevation: 0,
         centerTitle: true,
         leading: const BackButton(color: AppColors.textPrimary),
-        title: Text('Risk Profile Setup',
+        title: Text(Tr.t('risk_setup_appbar'),
             style: AppTextStyles.cardTitle.copyWith(color: AppColors.primary)),
       ),
       body: SingleChildScrollView(
@@ -65,11 +67,11 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Set up your risk profile',
+            Text(Tr.t('risk_setup_title'),
                 style: AppTextStyles.screenHeader.copyWith(fontSize: 24)),
             const SizedBox(height: 6),
             Text(
-              'Tell us about your household so we can personalize your risk assessment.',
+              Tr.t('risk_setup_subtitle'),
               style: AppTextStyles.body.copyWith(
                   color: AppColors.textSecondary, height: 1.5),
             ),
@@ -77,25 +79,25 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
             // Breadcrumb
             Row(
               children: [
-                _BreadcrumbStep(label: 'Location', active: true),
+                _BreadcrumbStep(label: Tr.t('step_location'), active: true),
                 const Icon(Icons.arrow_forward_ios,
                     size: 10, color: AppColors.textMuted),
-                _BreadcrumbStep(label: 'Household', active: true),
+                _BreadcrumbStep(label: Tr.t('step_household'), active: true),
                 const Icon(Icons.arrow_forward_ios,
                     size: 10, color: AppColors.textMuted),
-                _BreadcrumbStep(label: 'Done', active: false),
+                _BreadcrumbStep(label: Tr.t('step_done'), active: false),
               ],
             ),
             const SizedBox(height: 20),
 
             // Location section
             _SectionCard(
-              title: 'Where is your household located?',
+              title: Tr.t('loc_section_title'),
               child: Column(
                 children: [
                   _PrimaryBtn(
                     icon: Icons.my_location,
-                    label: 'Use current location',
+                    label: Tr.t('btn_current_loc'),
                     onTap: () {},
                   ),
                   const SizedBox(height: 10),
@@ -108,7 +110,7 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
                           borderRadius: BorderRadius.circular(12)),
                     ),
                     icon: const Icon(Icons.map_outlined, size: 16),
-                    label: const Text('Select location'),
+                    label: Text(Tr.t('btn_select_loc')),
                     onPressed: () {},
                   ),
                   const SizedBox(height: 12),
@@ -127,12 +129,12 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('SELECTED LOCATION',
+                              Text(Tr.t('lbl_selected_loc'),
                                   style: AppTextStyles.caption.copyWith(
                                       color: AppColors.textMuted,
                                       fontSize: 10,
                                       fontWeight: FontWeight.w700)),
-                              Text('Chitral, Khyber Pakhtunkhwa',
+                              Text(Tr.t('location_chitral'),
                                   style: AppTextStyles.body.copyWith(
                                       color: AppColors.primary, fontSize: 14)),
                             ],
@@ -148,9 +150,14 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
 
             // Construction
             _SectionCard(
-              title: 'House construction',
+              title: Tr.t('house_const_title'),
               child: _RadioGroup(
-                options: const ['Reinforced', 'Masonry', 'Mud / unreinforced', 'Other'],
+                options: [
+                  _OptionItem('Reinforced', Tr.t('const_reinforced')),
+                  _OptionItem('Masonry', Tr.t('const_masonry')),
+                  _OptionItem('Mud / unreinforced', Tr.t('const_mud')),
+                  _OptionItem('Other', Tr.t('const_other')),
+                ],
                 selected: _construction,
                 onChanged: (v) => setState(() => _construction = v),
               ),
@@ -159,9 +166,13 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
 
             // River
             _SectionCard(
-              title: 'How close is your home to a river?',
+              title: Tr.t('river_dist_title'),
               child: _RadioGroup(
-                options: const ['Very close', 'Nearby', 'Far'],
+                options: [
+                  _OptionItem('Very close', Tr.t('dist_very_close')),
+                  _OptionItem('Nearby', Tr.t('dist_nearby')),
+                  _OptionItem('Far', Tr.t('dist_far')),
+                ],
                 selected: _riverDistance,
                 onChanged: (v) => setState(() => _riverDistance = v),
               ),
@@ -170,9 +181,13 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
 
             // Slope
             _SectionCard(
-              title: 'How close is your home to a steep slope?',
+              title: Tr.t('slope_dist_title'),
               child: _RadioGroup(
-                options: const ['Very close', 'Nearby', 'Far'],
+                options: [
+                  _OptionItem('Very close', Tr.t('dist_very_close')),
+                  _OptionItem('Nearby', Tr.t('dist_nearby')),
+                  _OptionItem('Far', Tr.t('dist_far')),
+                ],
                 selected: _slopeDistance,
                 onChanged: (v) => setState(() => _slopeDistance = v),
               ),
@@ -181,9 +196,8 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
 
             // Vulnerable members (multi-select)
             _SectionCard(
-              title:
-                  'Does your household include anyone who may need additional assistance?',
-              subtitle: '(Select all that apply)',
+              title: Tr.t('vuln_title'),
+              subtitle: Tr.t('vuln_subtitle'),
               child: Column(
                 children: [
                   CheckboxListTile(
@@ -196,21 +210,21 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
                         _disability = false;
                       }
                     }),
-                    title: const Text('No'),
+                    title: Text(Tr.t('vuln_none')),
                     activeColor: AppColors.primary,
                     contentPadding: EdgeInsets.zero,
                     controlAffinity: ListTileControlAffinity.leading,
                   ),
                   ...[
-                    ('Elderly', _elderly, (v) {
+                    (Tr.t('vuln_elderly'), _elderly, (v) {
                       _elderly = v ?? false;
                       if (_elderly) _noVulnerable = false;
                     }),
-                    ('Children', _children, (v) {
+                    (Tr.t('vuln_children'), _children, (v) {
                       _children = v ?? false;
                       if (_children) _noVulnerable = false;
                     }),
-                    ('Person with disability', _disability, (v) {
+                    (Tr.t('vuln_disability'), _disability, (v) {
                       _disability = v ?? false;
                       if (_disability) _noVulnerable = false;
                     }),
@@ -245,12 +259,12 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
 
             // Livestock
             _SectionCard(
-              title: 'Do you keep livestock?',
+              title: Tr.t('livestock_title'),
               child: Row(
                 children: [
                   Expanded(
                     child: _ToggleBtn(
-                      label: 'Yes',
+                      label: LanguageService.instance.isUrdu ? 'ہاں' : 'Yes',
                       active: _livestock,
                       onTap: () => setState(() => _livestock = true),
                     ),
@@ -258,7 +272,7 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _ToggleBtn(
-                      label: 'No',
+                      label: LanguageService.instance.isUrdu ? 'نہیں' : 'No',
                       active: !_livestock,
                       onTap: () => setState(() => _livestock = false),
                     ),
@@ -270,12 +284,12 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
 
             // Transport
             _SectionCard(
-              title: 'How easily can your household access transport?',
+              title: Tr.t('transport_title'),
               child: _RadioGroup(
-                options: const [
-                  'Easy vehicle access',
-                  'Limited access',
-                  'No vehicle access'
+                options: [
+                  _OptionItem('Easy vehicle access', Tr.t('trans_easy')),
+                  _OptionItem('Limited access', Tr.t('trans_limited')),
+                  _OptionItem('No vehicle access', Tr.t('trans_none')),
                 ],
                 selected: _transport,
                 onChanged: (v) => setState(() => _transport = v),
@@ -300,7 +314,7 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
                         height: 18,
                         child: CircularProgressIndicator(
                             strokeWidth: 2, color: Colors.white))
-                    : const Text('Save Risk Profile'),
+                    : Text(Tr.t('save_risk_profile')),
               ),
             ),
             const SizedBox(height: 16),
@@ -311,15 +325,18 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
                   const Icon(Icons.lock_outline,
                       size: 12, color: AppColors.textMuted),
                   const SizedBox(width: 4),
-                  Text(
-                    'Your household information is used to personalize your risk guidance.',
-                    style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textMuted, fontSize: 11),
-                    textAlign: TextAlign.center,
+                  Expanded(
+                    child: Text(
+                      Tr.t('risk_profile_privacy_note'),
+                      style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textMuted, fontSize: 11),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ],
               ),
             ),
+
             const SizedBox(height: 40),
           ],
         ),
@@ -377,8 +394,14 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
+class _OptionItem {
+  final String key;
+  final String label;
+  const _OptionItem(this.key, this.label);
+}
+
 class _RadioGroup extends StatelessWidget {
-  final List<String> options;
+  final List<_OptionItem> options;
   final String selected;
   final ValueChanged<String> onChanged;
   const _RadioGroup({
@@ -390,9 +413,9 @@ class _RadioGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: options.map((opt) {
-        final isSelected = opt == selected;
+        final isSelected = opt.key == selected;
         return GestureDetector(
-          onTap: () => onChanged(opt),
+          onTap: () => onChanged(opt.key),
           child: Container(
             width: double.infinity,
             margin: const EdgeInsets.only(bottom: 8),
@@ -405,7 +428,7 @@ class _RadioGroup extends StatelessWidget {
                 width: isSelected ? 1.5 : 1,
               ),
             ),
-            child: Text(opt,
+            child: Text(opt.label,
                 style: AppTextStyles.body.copyWith(
                     color: isSelected ? AppColors.primary : AppColors.textPrimary,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,

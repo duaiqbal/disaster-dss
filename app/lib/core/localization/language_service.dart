@@ -18,6 +18,7 @@ class LanguageService {
   }
 
   bool get isRtl => currentLanguage.value == AppLanguage.urdu;
+  bool get isUrdu => currentLanguage.value == AppLanguage.urdu;
 
   Locale get locale {
     switch (currentLanguage.value) {

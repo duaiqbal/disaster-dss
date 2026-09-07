@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import '../../core/localization/app_translations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 
@@ -12,12 +13,32 @@ class _EmergencyContact {
 class EmergencyContactsScreen extends StatelessWidget {
   const EmergencyContactsScreen({super.key});
 
-  static const _contacts = [
-    _EmergencyContact(name: 'Rescue Service', description: 'Emergency rescue and assistance', number: '112'),
-    _EmergencyContact(name: 'Police', description: 'Emergency security and assistance', number: '100'),
-    _EmergencyContact(name: 'Fire & Rescue', description: 'Fire and rescue emergencies', number: '101'),
-    _EmergencyContact(name: 'Disaster Management Authority', description: 'Official disaster information and assistance', number: '1078'),
-    _EmergencyContact(name: 'District Administration', description: 'Local emergency coordination', number: '1077'),
+  List<_EmergencyContact> get _contacts => [
+    _EmergencyContact(
+      name: Tr.t('emergency_rescue_title'),
+      description: Tr.t('emergency_rescue_sub'),
+      number: '112',
+    ),
+    _EmergencyContact(
+      name: Tr.t('emergency_police_title'),
+      description: Tr.t('emergency_police_sub'),
+      number: '100',
+    ),
+    _EmergencyContact(
+      name: Tr.t('emergency_fire_title'),
+      description: Tr.t('emergency_fire_sub'),
+      number: '101',
+    ),
+    _EmergencyContact(
+      name: Tr.t('emergency_disaster_title'),
+      description: Tr.t('emergency_disaster_sub'),
+      number: '1078',
+    ),
+    _EmergencyContact(
+      name: Tr.t('emergency_district_title'),
+      description: Tr.t('emergency_district_sub'),
+      number: '1077',
+    ),
   ];
 
   @override
@@ -30,7 +51,7 @@ class EmergencyContactsScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Emergency Contacts',
+          Tr.t('emergency_contacts_title'),
           style: AppTextStyles.cardTitle.copyWith(color: AppColors.primary),
         ),
         leading: const BackButton(color: AppColors.textPrimary),
@@ -41,7 +62,7 @@ class EmergencyContactsScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text(
-              'Important numbers for emergency situations.',
+              Tr.t('emergency_contacts_sub'),
               style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
             ),
           ),
@@ -98,7 +119,7 @@ class EmergencyContactsScreen extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'For immediate danger, follow official emergency instructions and local authority guidance.',
+                    Tr.t('emergency_note'),
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.textSecondary,
                       height: 1.5,

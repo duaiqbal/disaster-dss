@@ -1,8 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../core/models/community_report.dart';
 import '../../core/services/disaster_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/localization/app_translations.dart';
 import '../chat/chat_screen.dart';
 
 class CommunityRiskScreen extends StatefulWidget {
@@ -23,7 +24,12 @@ class _CommunityRiskScreenState extends State<CommunityRiskScreen> {
 
   Future<void> _load() async {
     final reports = await DisasterRepository().getCommunityReports();
-    if (mounted) setState(() { _reports = reports; _loading = false; });
+    if (mounted) {
+      setState(() {
+        _reports = reports;
+        _loading = false;
+      });
+    }
   }
 
   @override
@@ -38,15 +44,16 @@ class _CommunityRiskScreenState extends State<CommunityRiskScreen> {
         leading: const BackButton(color: AppColors.textPrimary),
         title: Column(
           children: [
-            Text('Community Risk',
+            Text(Tr.t('community_title'),
                 style: AppTextStyles.cardTitle.copyWith(fontSize: 17)),
-            Text('Aggregated reports from your area',
+            Text(Tr.t('community_subtitle'),
                 style: AppTextStyles.caption.copyWith(
                     color: AppColors.textMuted, fontSize: 11)),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_community',
         backgroundColor: AppColors.primary,
         onPressed: () => Navigator.push(context,
             MaterialPageRoute(builder: (_) => const ChatScreen())),
@@ -71,7 +78,7 @@ class _CommunityRiskScreenState extends State<CommunityRiskScreen> {
                   const SizedBox(height: 16),
                   Center(
                     child: Text(
-                      'Prototype data may include simulated reports.',
+                      Tr.t('prototype_data'),
                       style: AppTextStyles.caption.copyWith(
                           color: AppColors.textMuted, fontSize: 11),
                     ),
@@ -103,7 +110,7 @@ class _PrivacyCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Privacy & Aggregation Protocol',
+                Text(Tr.t('community_privacy_title'),
                     style: AppTextStyles.caption.copyWith(
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary)),
@@ -112,14 +119,13 @@ class _PrivacyCard extends StatelessWidget {
                   text: TextSpan(
                     style: AppTextStyles.caption.copyWith(
                         color: AppColors.textSecondary, height: 1.5),
-                    children: const [
+                    children: [
                       TextSpan(
-                          text:
-                              'Reports are only surfaced when enough independent reports indicate the same issue. Minimum report threshold: '),
+                          text: Tr.t('community_privacy_body')),
                       TextSpan(
-                          text: '3 independent reports',
-                          style: TextStyle(fontWeight: FontWeight.w700)),
-                      TextSpan(text: '.'),
+                          text: Tr.t('community_privacy_threshold'),
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                      const TextSpan(text: '.'),
                     ],
                   ),
                 ),
@@ -139,7 +145,7 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text('Verified Issues',
+        Text(Tr.t('verified_issues'),
             style: AppTextStyles.sectionLabel.copyWith(fontSize: 18)),
         const Spacer(),
         _ViewToggle(),
@@ -164,8 +170,8 @@ class _ViewToggleState extends State<_ViewToggle> {
       ),
       child: Row(
         children: [
-          _tab('List', _list, () => setState(() => _list = true)),
-          _tab('Map', !_list, () => setState(() => _list = false)),
+          _tab(Tr.t('view_list'), _list, () => setState(() => _list = true)),
+          _tab(Tr.t('view_map_tab'), !_list, () => setState(() => _list = false)),
         ],
       ),
     );
@@ -192,6 +198,17 @@ class _ViewToggleState extends State<_ViewToggle> {
 class _ReportCard extends StatelessWidget {
   final CommunityReport report;
   const _ReportCard({required this.report});
+
+  String _translateType(String type) {
+    final lower = type.toLowerCase();
+    if (lower.contains('road') || lower.contains('block')) return Tr.t('issue_road_block');
+    if (lower.contains('land')) return Tr.t('issue_landslide');
+    if (lower.contains('flood')) return Tr.t('issue_flood');
+    if (lower.contains('water')) return Tr.t('issue_water_shortage');
+    if (lower.contains('infra')) return Tr.t('issue_infrastructure');
+    return type;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isHazard = report.type.toLowerCase().contains('road') ||
@@ -231,10 +248,10 @@ class _ReportCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(report.type,
+                    Text(_translateType(report.type),
                         style: AppTextStyles.cardTitle.copyWith(fontSize: 14)),
                     const SizedBox(height: 2),
-                    Text('Area: ${report.area}',
+                    Text('${Tr.t('report_area')}: ${report.area}',
                         style: AppTextStyles.caption.copyWith(
                             color: AppColors.textSecondary)),
                   ],
@@ -247,7 +264,9 @@ class _ReportCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  report.area.contains('settlement') ? 'Active' : 'Reported recently',
+                  report.area.contains('settlement')
+                      ? Tr.t('report_status_recent')
+                      : Tr.t('report_status_active'),
                   style: AppTextStyles.caption.copyWith(
                       color: AppColors.textMuted, fontSize: 11),
                 ),
@@ -268,7 +287,7 @@ class _ReportCard extends StatelessWidget {
                     size: 13, color: AppColors.primary),
                 const SizedBox(width: 5),
                 Text(
-                  'Verified by ${report.reportCount} independent reports',
+                  '${Tr.t('verified_by')} ${report.reportCount} ${Tr.t('independent_reports')}',
                   style: AppTextStyles.caption.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
@@ -298,11 +317,11 @@ class _ReportCta extends StatelessWidget {
           const Icon(Icons.add_location_alt_outlined,
               color: AppColors.textMuted, size: 36),
           const SizedBox(height: 10),
-          Text('Notice something in your area?',
+          Text(Tr.t('report_cta_title'),
               style: AppTextStyles.cardTitle.copyWith(fontSize: 15),
               textAlign: TextAlign.center),
           const SizedBox(height: 4),
-          Text('Contribute to community intelligence.',
+          Text(Tr.t('report_cta_sub'),
               style: AppTextStyles.body.copyWith(
                   color: AppColors.textMuted, fontSize: 13),
               textAlign: TextAlign.center),
@@ -318,7 +337,7 @@ class _ReportCta extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12)),
               ),
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('Report a local issue'),
+              label: Text(Tr.t('report_issue_btn')),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -347,13 +366,13 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
   final _descController = TextEditingController();
   bool _submitting = false;
 
-  static const _types = [
-    'Blocked road',
-    'Landslide / debris',
-    'Flooding',
-    'Water shortage',
-    'Damaged infrastructure',
-    'Other',
+  List<String> get _types => [
+    Tr.t('issue_road_block'),
+    Tr.t('issue_landslide'),
+    Tr.t('issue_flood'),
+    Tr.t('issue_water_shortage'),
+    Tr.t('issue_infrastructure'),
+    Tr.t('issue_other'),
   ];
 
   @override
@@ -364,8 +383,8 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
 
   Future<void> _submit() async {
     if (_selectedType == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Please select what you are reporting.')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(Tr.t('report_what_type'))));
       return;
     }
     setState(() => _submitting = true);
@@ -403,7 +422,7 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
         elevation: 0,
         centerTitle: true,
         leading: const BackButton(color: AppColors.textPrimary),
-        title: Text('Report Hazard',
+        title: Text(Tr.t('report_hazard_title'),
             style: AppTextStyles.cardTitle.copyWith(color: AppColors.primary)),
         actions: const [
           Padding(
@@ -418,17 +437,17 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Report a local issue',
+            Text(Tr.t('report_issue_title'),
                 style: AppTextStyles.screenHeader.copyWith(fontSize: 24)),
             const SizedBox(height: 6),
-            Text('Share information about a hazard or disruption in your area.',
+            Text(Tr.t('report_issue_sub'),
                 style: AppTextStyles.body.copyWith(
                     color: AppColors.textSecondary, height: 1.5)),
             const SizedBox(height: 20),
 
             // Type card
             _Card(
-              title: 'What are you reporting?',
+              title: Tr.t('report_what_type'),
               child: Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -460,8 +479,8 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
 
             // Location card
             _Card(
-              title: 'Where is the issue?',
-              titleSuffix: Text('Change location',
+              title: Tr.t('report_where'),
+              titleSuffix: Text(Tr.t('report_location_change'),
                   style: AppTextStyles.caption.copyWith(
                       color: AppColors.primary, fontWeight: FontWeight.w600)),
               child: Container(
@@ -476,7 +495,7 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
                     const Icon(Icons.location_on_outlined,
                         color: AppColors.primary, size: 16),
                     const SizedBox(width: 8),
-                    Text('Chitral, Khyber Pakhtunkhwa',
+                    Text(Tr.t('location_chitral'),
                         style: AppTextStyles.body.copyWith(
                             color: AppColors.primary, fontSize: 14)),
                   ],
@@ -487,10 +506,7 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
 
             // Description card
             _Card(
-              title: 'Description',
-              titleSuffix: Text('(Optional)',
-                  style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textMuted)),
+              title: Tr.t('report_details'),
               child: Column(
                 children: [
                   TextField(
@@ -498,7 +514,7 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
                     maxLines: 5,
                     style: AppTextStyles.body.copyWith(fontSize: 14),
                     decoration: InputDecoration(
-                      hintText: 'Briefly describe what you observed...',
+                      hintText: Tr.t('report_details_hint'),
                       hintStyle: AppTextStyles.body.copyWith(
                           color: AppColors.textDisabled, fontSize: 14),
                       border: OutlineInputBorder(
@@ -520,7 +536,7 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
                     ),
                     icon: const Icon(Icons.add_a_photo_outlined,
                         size: 16, color: AppColors.primary),
-                    label: Text('Add photo',
+                    label: Text(Tr.t('report_add_photo'),
                         style: AppTextStyles.caption.copyWith(
                             color: AppColors.primary)),
                     style: TextButton.styleFrom(
@@ -548,7 +564,7 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
                       const Icon(Icons.shield_outlined,
                           color: AppColors.primary, size: 18),
                       const SizedBox(width: 8),
-                      Text('Privacy & aggregation',
+                      Text(Tr.t('report_privacy_title'),
                           style: AppTextStyles.caption.copyWith(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w700,
@@ -557,7 +573,7 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Your report is not displayed as an individual report. Community intelligence is surfaced only after enough independent reports indicate the same issue.',
+                    Tr.t('report_privacy_full'),
                     style: AppTextStyles.caption.copyWith(
                         color: AppColors.textSecondary, height: 1.5),
                   ),
@@ -575,7 +591,7 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
                         const Icon(Icons.people_outline,
                             size: 14, color: AppColors.primary),
                         const SizedBox(width: 6),
-                        Text('Minimum aggregation threshold: 3 independent reports',
+                        Text(Tr.t('report_privacy_threshold'),
                             style: AppTextStyles.caption.copyWith(
                                 color: AppColors.primary,
                                 fontSize: 11,
@@ -605,14 +621,14 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
                         child: CircularProgressIndicator(
                             strokeWidth: 2, color: Colors.white))
                     : const Icon(Icons.send_outlined, size: 18),
-                label: Text(_submitting ? 'Submitting...' : 'Submit Report'),
+                label: Text(_submitting ? Tr.t('report_submitting') : Tr.t('report_submit_btn')),
                 onPressed: _submitting ? null : _submit,
               ),
             ),
             const SizedBox(height: 16),
             Center(
               child: Text(
-                'Prototype may use simulated community reports.',
+                Tr.t('report_proto_note'),
                 style: AppTextStyles.caption.copyWith(
                     color: AppColors.textMuted, fontSize: 11),
               ),
@@ -656,18 +672,18 @@ class _ReportSuccessSheet extends StatelessWidget {
                 color: AppColors.primary, size: 30),
           ),
           const SizedBox(height: 16),
-          Text('Report Submitted',
+          Text(Tr.t('report_success_title'),
               style: AppTextStyles.cardTitle.copyWith(fontSize: 18)),
           const SizedBox(height: 8),
           Text(
-            'Thank you for helping improve community risk intelligence.',
+            Tr.t('report_success_sub'),
             style: AppTextStyles.body.copyWith(
                 color: AppColors.textSecondary, height: 1.5),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            'Your report will be aggregated with other independent reports and reviewed according to the community reporting protocol.',
+            Tr.t('report_success_note'),
             style: AppTextStyles.caption.copyWith(
                 color: AppColors.textMuted, height: 1.5),
             textAlign: TextAlign.center,
@@ -684,7 +700,7 @@ class _ReportSuccessSheet extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12)),
               ),
               icon: const Icon(Icons.arrow_forward, size: 16),
-              label: const Text('Back to Community Risk'),
+              label: Text(Tr.t('go_to_community_risk')),
               onPressed: onBack,
             ),
           ),
@@ -700,7 +716,7 @@ class _ReportSuccessSheet extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12)),
               ),
               onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
+              child: Text(Tr.t('close')),
             ),
           ),
           const SizedBox(height: 8),

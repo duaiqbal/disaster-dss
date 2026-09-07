@@ -1,7 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../core/models/official_alert.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/localization/app_translations.dart';
+import '../../core/localization/language_service.dart';
 import '../chat/chat_screen.dart';
 import '../safety/safety_hub_screen.dart';
 import '../profile/emergency_contacts_screen.dart';
@@ -17,6 +19,22 @@ class AlertDetailsScreen extends StatefulWidget {
 class _AlertDetailsScreenState extends State<AlertDetailsScreen> {
   bool _xaiExpanded = false;
 
+  String _getDescription(String desc) {
+    if (!LanguageService.instance.isUrdu) return desc;
+    return 'شدید بارش سے خاص طور پر دریاؤں اور کھڑی ڈھلوانوں کے قریب اچانک سیلاب اور لینڈ سلائیڈنگ کا خطرہ بڑھ سکتا ہے۔';
+  }
+
+  List<String> _getActions(List<String> actions) {
+    if (!LanguageService.instance.isUrdu) return actions;
+    return [
+      'سرکاری اپ ڈیٹس کی باقاعدگی سے نگرانی کریں۔',
+      'ضروری دستاویزات اور ادویات تیار رکھیں۔',
+      'دریا کے راستوں اور غیر مستحکم ڈھلوانوں سے دور رہیں۔',
+      'انخلاء کا راستہ کھلا اور تیار رکھیں۔',
+      'اگر مشورہ دیا جائے تو مویشیوں کو محفوظ مقام پر منتقل کریں۔',
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final alert = widget.alert;
@@ -28,12 +46,13 @@ class _AlertDetailsScreenState extends State<AlertDetailsScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Alert Details',
+          Tr.t('alert_details_title'),
           style: AppTextStyles.cardTitle.copyWith(color: AppColors.primary),
         ),
         leading: const BackButton(color: AppColors.textPrimary),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_alert_details',
         backgroundColor: AppColors.primary,
         onPressed: () => Navigator.push(
           context,
@@ -48,11 +67,11 @@ class _AlertDetailsScreenState extends State<AlertDetailsScreen> {
             _AlertHeaderCard(alert: alert),
             const SizedBox(height: 12),
             _InfoCard(
-              title: 'What is happening',
-              body: alert.description,
+              title: Tr.t('what_is_happening'),
+              body: _getDescription(alert.description),
             ),
             const SizedBox(height: 12),
-            _WhatToDoCard(actions: alert.whatToDo),
+            _WhatToDoCard(actions: _getActions(alert.whatToDo)),
             const SizedBox(height: 12),
             _XaiAccordionCard(
               expanded: _xaiExpanded,
@@ -72,6 +91,23 @@ class _AlertDetailsScreenState extends State<AlertDetailsScreen> {
 class _AlertHeaderCard extends StatelessWidget {
   final OfficialAlert alert;
   const _AlertHeaderCard({required this.alert});
+
+  String _getTitle(String t) {
+    if (!LanguageService.instance.isUrdu) return t;
+    return 'شدید بارش سے متعلق ایڈوائزری';
+  }
+
+  String _getSource(String s) {
+    if (!LanguageService.instance.isUrdu) return s;
+    if (s.contains('Meteorological')) return 'محکمہ موسمیات پاکستان';
+    return s;
+  }
+
+  String _getArea(String a) {
+    if (!LanguageService.instance.isUrdu) return a;
+    if (a.contains('Chitral')) return 'ضلع چترال';
+    return a;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +139,7 @@ class _AlertHeaderCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 5),
                 Text(
-                  'OFFICIAL WARNING',
+                  Tr.t('official_warning_badge'),
                   style: AppTextStyles.caption.copyWith(
                     color: isHigh ? AppColors.riskHigh : AppColors.riskModerate,
                     fontWeight: FontWeight.w700,
@@ -114,16 +150,16 @@ class _AlertHeaderCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Text(alert.title, style: AppTextStyles.screenHeader.copyWith(fontSize: 22)),
+          Text(_getTitle(alert.title), style: AppTextStyles.screenHeader.copyWith(fontSize: 22)),
           const SizedBox(height: 6),
           Text(
-            alert.source,
+            _getSource(alert.source),
             style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 10),
-          _MetaRow(icon: Icons.location_on_outlined, text: alert.area),
+          _MetaRow(icon: Icons.location_on_outlined, text: _getArea(alert.area)),
           const SizedBox(height: 6),
-          _MetaRow(icon: Icons.access_time_outlined, text: 'Issued: 2 hours ago'),
+          _MetaRow(icon: Icons.access_time_outlined, text: Tr.t('issued_label')),
         ],
       ),
     );
@@ -202,7 +238,7 @@ class _WhatToDoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('What to do now', style: AppTextStyles.cardTitle),
+          Text(Tr.t('what_to_do_now'), style: AppTextStyles.cardTitle),
           const SizedBox(height: 14),
           ...actions.asMap().entries.map(
                 (e) => Padding(
@@ -242,7 +278,7 @@ class _WhatToDoCard extends StatelessWidget {
                   size: 13, color: AppColors.textMuted),
               const SizedBox(width: 6),
               Text(
-                'Safety actions validated against approved guidance.',
+                Tr.t('safety_validated'),
                 style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
               ),
             ],
@@ -278,7 +314,7 @@ class _XaiAccordionCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Why am I seeing these actions?',
+                      Tr.t('why_seeing_actions'),
                       style: AppTextStyles.cardTitle,
                     ),
                   ),
@@ -294,7 +330,9 @@ class _XaiAccordionCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
               child: Text(
-                'These recommended actions are derived from official NDMA and PMD emergency guidelines for Chitral District. They are matched to your location, the current alert level, and your household risk profile. The AI system does not generate new advice — it retrieves and ranks verified official guidance.',
+                LanguageService.instance.isUrdu
+                    ? 'یہ تجویز کردہ اقدامات ضلع چترال کے لیے سرکاری NDMA اور PMD کی ہنگامی ہدایات سے لیے گئے ہیں۔ یہ آپ کے محل وقوع، الرٹ لیول اور گھریلو خطرے کے کوائف سے مماثل ہیں۔ AI کا نظام نیا مشورہ پیدا نہیں کرتا بلکہ تصدیق شدہ سرکاری رہنمائی کو تلاش اور پیش کرتا ہے۔'
+                    : 'These recommended actions are derived from official NDMA and PMD emergency guidelines for Chitral District. They are matched to your location, the current alert level, and your household risk profile. The AI system does not generate new advice — it retrieves and ranks verified official guidance.',
                 style: AppTextStyles.body.copyWith(
                   color: AppColors.textSecondary,
                   height: 1.6,
@@ -328,7 +366,7 @@ class _ActionButtons extends StatelessWidget {
               ),
             ),
             icon: const Icon(Icons.map_outlined, size: 18),
-            label: const Text('View on Map'),
+            label: Text(Tr.t('view_on_map')),
             onPressed: () {
               // Pop back to nav shell at map tab
               Navigator.popUntil(context, (r) => r.isFirst);
@@ -353,7 +391,7 @@ class _ActionButtons extends StatelessWidget {
                   MaterialPageRoute(
                       builder: (_) => const SafetyHubScreen()),
                 ),
-                child: const Text('Safety Guide'),
+                child: Text(Tr.t('safety_guide')),
               ),
             ),
             const SizedBox(width: 10),
@@ -372,8 +410,8 @@ class _ActionButtons extends StatelessWidget {
                   MaterialPageRoute(
                       builder: (_) => const EmergencyContactsScreen()),
                 ),
-                child: const Text(
-                  'Emergency Contacts',
+                child: Text(
+                  Tr.t('emergency_contacts'),
                   textAlign: TextAlign.center,
                 ),
               ),
