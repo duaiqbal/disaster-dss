@@ -3,6 +3,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/models/official_alert.dart';
 import '../../core/services/disaster_repository.dart';
+import 'alert_details_screen.dart';
 
 class OfficialAlertsScreen extends StatefulWidget {
   final Function(OfficialAlert)? onSelectAlert;
@@ -110,16 +111,29 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
   Widget _buildAlertCard(OfficialAlert alert) {
     final isHigh = alert.severity.toLowerCase() == 'high';
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return InkWell(
+      onTap: () {
+        if (widget.onSelectAlert != null) {
+          widget.onSelectAlert!(alert);
+        } else {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => AlertDetailsScreen(alert: alert),
+            ),
+          );
+        }
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -247,6 +261,7 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
             ),
         ],
       ),
+    ),
     );
   }
 }

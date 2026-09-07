@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import 'risk_profile_screen.dart';
+import 'emergency_contacts_screen.dart';
+import '../safety/safety_hub_screen.dart';
+import '../feedback/feedback_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final VoidCallback? onLogout;
@@ -98,7 +102,11 @@ class ProfileScreen extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const RiskProfileScreen()),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
@@ -122,20 +130,55 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 children: [
                   _buildMenuItem(
+                    context: context,
                     icon: Icons.person_search_outlined,
                     title: 'Risk Profile',
-                    subtitle: 'Manage household characteristics used for personalized risk assessment',
-                    onTap: () {},
+                    subtitle: 'Manage household characteristics',
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const RiskProfileScreen()),
+                    ),
                   ),
                   const Divider(height: 1, indent: 56),
                   _buildMenuItem(
+                    context: context,
                     icon: Icons.contact_phone_outlined,
                     title: 'Emergency Contacts',
                     subtitle: 'View important emergency numbers',
-                    onTap: () {},
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const EmergencyContactsScreen()),
+                    ),
                   ),
                   const Divider(height: 1, indent: 56),
                   _buildMenuItem(
+                    context: context,
+                    icon: Icons.health_and_safety_outlined,
+                    title: 'Safety Hub',
+                    subtitle: 'Safe bag checklist and hazard guides',
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const SafetyHubScreen()),
+                    ),
+                  ),
+                  const Divider(height: 1, indent: 56),
+                  _buildMenuItem(
+                    context: context,
+                    icon: Icons.rate_review_outlined,
+                    title: 'Give Feedback',
+                    subtitle: 'Help improve the guidance system',
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const FeedbackScreen()),
+                    ),
+                  ),
+                  const Divider(height: 1, indent: 56),
+                  _buildMenuItem(
+                    context: context,
                     icon: Icons.language,
                     title: 'Language',
                     subtitle: 'English',
@@ -168,6 +211,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildMenuItem({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String subtitle,

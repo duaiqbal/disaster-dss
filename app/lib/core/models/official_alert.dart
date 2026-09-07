@@ -21,6 +21,8 @@ class OfficialAlert {
     this.whatToDo = const [],
   });
 
+  String get source => sourceOrg;
+
   factory OfficialAlert.fromJson(Map<String, dynamic> json) {
     return OfficialAlert(
       id: json['id'] as String? ?? 'alert_001',

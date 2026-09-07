@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/models/official_alert.dart';
 import '../dashboard/screens/main_risk_dashboard_screen.dart';
 import '../forecast/forecast_screen.dart';
 import '../map/map_screen.dart';
 import '../alerts/official_alerts_screen.dart';
+import '../alerts/alert_details_screen.dart';
+import '../community/community_risk_screen.dart';
 import '../profile/profile_screen.dart';
 import '../chat/chat_screen.dart';
 import '../auth/login_screen.dart';
@@ -52,10 +55,32 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
       MainRiskDashboardScreen(
         onNavigateToTab: _navigateToTab,
         onOpenAiAssistant: _openAiAssistant,
+        onOpenAlertDetails: (OfficialAlert alert) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => AlertDetailsScreen(alert: alert),
+            ),
+          );
+        },
+        onOpenCommunityReports: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const CommunityRiskScreen(),
+            ),
+          );
+        },
       ),
       const ForecastScreen(),
       const MapScreen(),
-      const OfficialAlertsScreen(),
+      OfficialAlertsScreen(
+        onSelectAlert: (OfficialAlert alert) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => AlertDetailsScreen(alert: alert),
+            ),
+          );
+        },
+      ),
       ProfileScreen(onLogout: _handleLogout),
     ];
 

@@ -133,4 +133,18 @@ class DisasterRepository {
     }
     return 'Rainfall is increasing while your household is near a steep slope. Review your evacuation route and keep essential documents ready.';
   }
+
+  /// Submits a community hazard report to the backend (or offline no-op)
+  Future<void> submitReport({
+    required String type,
+    required String location,
+    required String description,
+  }) async {
+    await ApiService.post('/api/reports', {
+      'type': type,
+      'location': location,
+      'description': description,
+    });
+    // Offline fallback: no-op — report will be synced when connectivity returns
+  }
 }

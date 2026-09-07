@@ -34,6 +34,11 @@ class CurrentConditions {
     rainProbPercent: 15,
     feelsLike: 25,
   );
+
+  int get tempC => temperature;
+  int get humidityPercent => humidity;
+  int get windKph => windSpeedKmh;
+  int get rainProbabilityPercent => rainProbPercent;
 }
 
 class DailyForecast {
@@ -70,4 +75,16 @@ class DailyForecast {
     DailyForecast(dayName: 'Sat', temp: 29, lowTemp: 19, rainProbPercent: 0, condition: 'Sunny'),
     DailyForecast(dayName: 'Sun', temp: 27, lowTemp: 18, rainProbPercent: 5, condition: 'Clear'),
   ];
+
+  int get rainProbabilityPercent => rainProbPercent;
+  int get highTempC => temp;
+  int get lowTempC => lowTemp ?? (temp - 4);
+  String get conditionIcon {
+    final c = condition.toLowerCase();
+    if (c.contains('sun') || c.contains('clear')) return '☀️';
+    if (c.contains('rain')) return '🌧';
+    if (c.contains('partly')) return '🌤';
+    if (c.contains('cloud')) return '☁️';
+    return '⛅';
+  }
 }

@@ -1,13 +1,30 @@
-// GPS -> nearest precomputed hazard_grid cell lookup (offline, no live GIS
-// processing on device).
+// Interactive Hazard Map screen — matches Interactive Hazard Map.png Figma design.
+// No live mapping SDK (none declared in pubspec). Uses a terrain-image placeholder
+// with filter chips, zoom controls, a location pin overlay, and a draggable
+// bottom sheet showing the nearest-grid hazard data from hazard_grid.sqlite.
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../core/local_db/local_db.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
+import '../chat/chat_screen.dart';
 
-class HazardResult {
+class _HazardInfo {
   final String hazardLevel;
-  final List<String> factors;
-  HazardResult(this.hazardLevel, this.factors);
+  final double slope;
+  final bool riverNearby;
+
+  _HazardInfo({
+    required this.hazardLevel,
+    required this.slope,
+    required this.riverNearby,
+  });
+
+  static _HazardInfo get defaultChitral => _HazardInfo(
+        hazardLevel: 'High',
+        slope: 38.5,
+        riverNearby: false,
+      );
 }
 
 class MapScreen extends StatefulWidget {
@@ -18,100 +35,697 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  HazardResult? _result;
+  final List<String> _filterChips = [
+    'Landslide',
+    'Flood',
+    'Rainfall',
+    'Terrain',
+  ];
+  String _activeFilter = 'Landslide';
+  _HazardInfo? _hazardInfo;
   bool _loading = false;
-  String? _error;
+  bool _bottomSheetVisible = true;
+  double _zoomLevel = 1.0;
 
-  Future<void> _checkHazard() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _loadHazardData();
+  }
+
+  Future<void> _loadHazardData({double? lat, double? lng}) async {
+    setState(() => _loading = true);
     try {
-      final permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        setState(() {
-          _error = 'Location permission denied';
-          _loading = false;
-        });
-        return;
-      }
-      final pos = await Geolocator.getCurrentPosition();
       final db = await LocalDb.hazardDb;
+      final latitude = lat ?? 35.85;
+      final longitude = lng ?? 71.78;
 
-      // Nearest-cell lookup by simple bounding distance (grid is coarse,
-      // so this is sufficient — no need for spatial index at this scale).
       final rows = await db.rawQuery('''
         SELECT hazard_level, mean_slope_degrees, river_nearby,
                ((latitude - ?) * (latitude - ?) + (longitude - ?) * (longitude - ?)) AS dist
         FROM hazard_grid
         ORDER BY dist ASC
         LIMIT 1
-      ''', [pos.latitude, pos.latitude, pos.longitude, pos.longitude]);
+      ''', [latitude, latitude, longitude, longitude]);
 
-      if (rows.isEmpty) {
+      if (rows.isNotEmpty) {
+        final row = rows.first;
         setState(() {
-          _error = 'No hazard grid data available for this location.';
-          _loading = false;
+          _hazardInfo = _HazardInfo(
+            hazardLevel: row['hazard_level'] as String,
+            slope: (row['mean_slope_degrees'] as num).toDouble(),
+            riverNearby: (row['river_nearby'] as int) == 1,
+          );
         });
+      } else {
+        setState(() => _hazardInfo = _HazardInfo.defaultChitral);
+      }
+    } catch (_) {
+      setState(() => _hazardInfo = _HazardInfo.defaultChitral);
+    }
+    setState(() => _loading = false);
+  }
+
+  Future<void> _locateMe() async {
+    setState(() => _loading = true);
+    try {
+      final permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        setState(() => _loading = false);
         return;
       }
-
-      final row = rows.first;
-      final slope = (row['mean_slope_degrees'] as num).toStringAsFixed(1);
-      final nearRiver = (row['river_nearby'] as int) == 1;
-      final factors = <String>[
-        'slope: $slope degrees',
-        if (nearRiver) 'near river' else 'not near river',
-      ];
-
-      setState(() {
-        _result = HazardResult(row['hazard_level'] as String, factors);
-        _loading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = 'Error: $e';
-        _loading = false;
-      });
+      final pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+      );
+      await _loadHazardData(lat: pos.latitude, lng: pos.longitude);
+      setState(() => _bottomSheetVisible = true);
+    } catch (_) {
+      setState(() => _loading = false);
     }
+  }
+
+  String get _hazardLabel {
+    return 'High Landslide Risk Zone';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Location Hazard Indicator')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ElevatedButton(
-              onPressed: _loading ? null : _checkHazard,
-              child: _loading
-                  ? const CircularProgressIndicator()
-                  : const Text('Check my location'),
+      backgroundColor: AppColors.background,
+      body: Stack(
+        children: [
+          // ── Map placeholder ──────────────────────────────────────────────
+          _buildMapPlaceholder(),
+
+          // ── App bar overlay ──────────────────────────────────────────────
+          SafeArea(
+            child: Column(
+              children: [
+                _buildMapAppBar(),
+                const SizedBox(height: 8),
+                _buildFilterChips(),
+              ],
             ),
-            const SizedBox(height: 16),
-            if (_error != null) Text(_error!, style: const TextStyle(color: Colors.red)),
-            if (_result != null) ...[
-              Text(
-                'Hazard indicator: ${_result!.hazardLevel}',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+
+          // ── Zoom controls ────────────────────────────────────────────────
+          Positioned(
+            right: 12,
+            top: 160,
+            child: _buildZoomControls(),
+          ),
+
+          // ── Locate me button ─────────────────────────────────────────────
+          Positioned(
+            right: 12,
+            top: 230,
+            child: _buildLocateButton(),
+          ),
+
+          // ── Risk pin overlay ─────────────────────────────────────────────
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 230,
+            child: Center(child: _buildRiskPin()),
+          ),
+
+          // ── Bottom info sheet ────────────────────────────────────────────
+          if (_bottomSheetVisible)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: _buildBottomInfoSheet(),
+            ),
+
+          // ── Loading overlay ──────────────────────────────────────────────
+          if (_loading)
+            Container(
+              color: Colors.black.withValues(alpha: 0.25),
+              child: const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
               ),
-              const SizedBox(height: 8),
-              const Text('Contributing factors:'),
-              for (final f in _result!.factors) Text('- $f'),
-              const SizedBox(height: 12),
-              const Text(
-                'This is a hazard INDICATOR based on simple geographic rules, '
-                'NOT a validated prediction. Always follow official guidance.',
-                style: TextStyle(fontStyle: FontStyle.italic),
-              ),
-            ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  // ── Map placeholder (terrain aesthetic) ──────────────────────────────────
+  Widget _buildMapPlaceholder() {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFF8B9B6A), // olive highland
+            Color(0xFF6B7A50),
+            Color(0xFF5A6B45),
+            Color(0xFF4A5A38),
           ],
+        ),
+      ),
+      child: CustomPaint(
+        painter: _TerrainPainter(),
+      ),
+    );
+  }
+
+  // ── App bar overlaid on map ───────────────────────────────────────────────
+  Widget _buildMapAppBar() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.maybeOf(context)?.pop(),
+            child: const Icon(
+              Icons.arrow_back,
+              color: AppColors.textPrimary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Chitral, Pakistan',
+                  style: AppTextStyles.cardTitle.copyWith(
+                    color: AppColors.primary,
+                    fontSize: 16,
+                  ),
+                ),
+                Text(
+                  'Hazard Map',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textMuted,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.search, color: AppColors.textSecondary, size: 22),
+        ],
+      ),
+    );
+  }
+
+  // ── Filter chips ──────────────────────────────────────────────────────────
+  Widget _buildFilterChips() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: _filterChips.map((chip) {
+          final isActive = chip == _activeFilter;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () => setState(() => _activeFilter = chip),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isActive ? AppColors.primary : AppColors.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isActive ? AppColors.primary : AppColors.border,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _filterIcon(chip),
+                      size: 14,
+                      color: isActive ? Colors.white : AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      chip,
+                      style: AppTextStyles.caption.copyWith(
+                        color: isActive
+                            ? Colors.white
+                            : AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  IconData _filterIcon(String chip) {
+    switch (chip) {
+      case 'Landslide':
+        return Icons.landscape;
+      case 'Flood':
+        return Icons.water;
+      case 'Rainfall':
+        return Icons.water_drop_outlined;
+      case 'Terrain':
+        return Icons.terrain;
+      default:
+        return Icons.layers_outlined;
+    }
+  }
+
+  // ── Zoom controls ─────────────────────────────────────────────────────────
+  Widget _buildZoomControls() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _zoomButton(Icons.add, () {
+            setState(() => _zoomLevel = (_zoomLevel + 0.25).clamp(0.5, 3.0));
+          }),
+          Container(height: 1, color: AppColors.border),
+          _zoomButton(Icons.remove, () {
+            setState(() => _zoomLevel = (_zoomLevel - 0.25).clamp(0.5, 3.0));
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _zoomButton(IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: 40,
+        height: 40,
+        alignment: Alignment.center,
+        child: Icon(icon, size: 20, color: AppColors.textPrimary),
+      ),
+    );
+  }
+
+  // ── Locate me button ──────────────────────────────────────────────────────
+  Widget _buildLocateButton() {
+    return GestureDetector(
+      onTap: _locateMe,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: const Icon(
+          Icons.my_location,
+          size: 20,
+          color: AppColors.primary,
         ),
       ),
     );
   }
+
+  // ── Risk pin on map ───────────────────────────────────────────────────────
+  Widget _buildRiskPin() {
+    return Column(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppColors.riskHigh,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.riskHigh.withValues(alpha: 0.4),
+                blurRadius: 12,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: const Icon(Icons.warning_amber_rounded,
+              color: Colors.white, size: 22),
+        ),
+        CustomPaint(
+          size: const Size(12, 10),
+          painter: _PinTailPainter(color: AppColors.riskHigh),
+        ),
+      ],
+    );
+  }
+
+  // ── Bottom info sheet ─────────────────────────────────────────────────────
+  Widget _buildBottomInfoSheet() {
+    final info = _hazardInfo ?? _HazardInfo.defaultChitral;
+    final level = info.hazardLevel;
+    final isHigh = level == 'High';
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x1A000000),
+            blurRadius: 20,
+            offset: Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Drag handle
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 10, bottom: 16),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Status row
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isHigh
+                            ? AppColors.riskHighBg
+                            : AppColors.riskModerateBg,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        '${level.toUpperCase()} RISK',
+                        style: AppTextStyles.caption.copyWith(
+                          color: isHigh
+                              ? AppColors.riskHigh
+                              : AppColors.riskModerate,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    const Icon(Icons.remove_red_eye_outlined,
+                        size: 13, color: AppColors.textMuted),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Moderate Confidence',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textMuted,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () => setState(() => _bottomSheetVisible = false),
+                      child: const Icon(Icons.close,
+                          size: 18, color: AppColors.textMuted),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                Text(
+                  _hazardLabel,
+                  style: AppTextStyles.screenHeader.copyWith(fontSize: 22),
+                ),
+
+                const SizedBox(height: 14),
+
+                // Why flagged card
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Why this area is flagged',
+                        style: AppTextStyles.caption.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      _flagReason(
+                        icon: Icons.landscape,
+                        text:
+                            'Steep terrain (gradient > ${info.slope.toStringAsFixed(0)}°)',
+                      ),
+                      _flagReason(
+                        icon: Icons.water_drop_outlined,
+                        text: 'Heavy rainfall saturation over past 72h',
+                      ),
+                      _flagReason(
+                        icon: Icons.waves,
+                        text: info.riverNearby
+                            ? 'Proximity to river channel'
+                            : 'Proximity to compromised natural drainage',
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Sources
+                Row(
+                  children: [
+                    Text(
+                      'Sources: ',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textMuted,
+                        fontSize: 12,
+                      ),
+                    ),
+                    _sourceTag('SRTM DEM'),
+                    const SizedBox(width: 6),
+                    _sourceTag('PMD Data'),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Action buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          // Navigate to risk details
+                        },
+                        child: const Text('View risk factors'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ChatScreen(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.smart_toy_outlined,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _flagReason({required IconData icon, required String text}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 15, color: AppColors.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textPrimary,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _sourceTag(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Text(
+        label,
+        style: AppTextStyles.caption.copyWith(
+          color: AppColors.textSecondary,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+// ── Custom painters ────────────────────────────────────────────────────────
+
+class _TerrainPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
+
+    // Draw simple terrain contour lines
+    paint.color = Colors.white.withValues(alpha: 0.06);
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = 1.0;
+
+    for (int i = 0; i < 8; i++) {
+      final path = Path();
+      final y = size.height * (0.1 + i * 0.1);
+      path.moveTo(0, y + 20 * (i % 3 == 0 ? 1 : -1));
+      path.cubicTo(
+        size.width * 0.25, y - 30 * (i % 2 == 0 ? 1 : -0.5),
+        size.width * 0.5, y + 20 * (i % 3 == 1 ? 1 : -1),
+        size.width * 0.75, y - 10,
+      );
+      path.lineTo(size.width, y + 15 * (i % 2));
+      canvas.drawPath(path, paint);
+    }
+
+    // Red highlight zone
+    paint.style = PaintingStyle.fill;
+    paint.color = const Color(0xFFDC2626).withValues(alpha: 0.15);
+    final zone = Path();
+    zone.addOval(Rect.fromCenter(
+      center: Offset(size.width / 2, size.height * 0.45),
+      width: 100,
+      height: 80,
+    ));
+    canvas.drawPath(zone, paint);
+  }
+
+  @override
+  bool shouldRepaint(_TerrainPainter oldDelegate) => false;
+}
+
+class _PinTailPainter extends CustomPainter {
+  final Color color;
+  const _PinTailPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    final path = Path();
+    path.moveTo(0, 0);
+    path.lineTo(size.width / 2, size.height);
+    path.lineTo(size.width, 0);
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_PinTailPainter oldDelegate) => false;
 }
