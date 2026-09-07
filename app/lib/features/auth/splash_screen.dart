@@ -51,65 +51,76 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     return Scaffold(
       backgroundColor: const Color(0xFFF3F4F6),
       body: SafeArea(
-        child: Column(
-          children: [
-            const Spacer(flex: 3),
-            FadeTransition(
-              opacity: _fade,
-              child: ScaleTransition(
-                scale: _scale,
-                child: Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.teal.withValues(alpha: 0.15),
-                        blurRadius: 20,
-                        offset: const Offset(0, 6),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    children: [
+                      const Spacer(flex: 3),
+                      FadeTransition(
+                        opacity: _fade,
+                        child: ScaleTransition(
+                          scale: _scale,
+                          child: Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.teal.withValues(alpha: 0.15),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(Icons.shield_outlined, color: Colors.teal, size: 36),
+                          ),
+                        ),
                       ),
+                      const SizedBox(height: 20),
+                      FadeTransition(
+                        opacity: _fade,
+                        child: const Text(
+                          'Climate Risk Assistant',
+                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      FadeTransition(
+                        opacity: _fade,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 48),
+                          child: Text(
+                            'Explainable AI for climate hazard risk and preparedness',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.black54),
+                          ),
+                        ),
+                      ),
+                      const Spacer(flex: 4),
+                      const _PulsingLoadingBar(),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'LOADING ENVIRONMENT DATA',
+                        style: TextStyle(
+                          fontSize: 11,
+                          letterSpacing: 1,
+                          color: Colors.black45,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
                     ],
                   ),
-                  child: const Icon(Icons.shield_outlined, color: Colors.teal, size: 36),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            FadeTransition(
-              opacity: _fade,
-              child: const Text(
-                'Climate Risk Assistant',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-            ),
-            const SizedBox(height: 8),
-            FadeTransition(
-              opacity: _fade,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 48),
-                child: Text(
-                  'Explainable AI for climate hazard risk and preparedness',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.black54),
-                ),
-              ),
-            ),
-            const Spacer(flex: 4),
-            const _PulsingLoadingBar(),
-            const SizedBox(height: 12),
-            const Text(
-              'LOADING ENVIRONMENT DATA',
-              style: TextStyle(
-                fontSize: 11,
-                letterSpacing: 1,
-                color: Colors.black45,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 40),
-          ],
+            );
+          },
         ),
       ),
     );

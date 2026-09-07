@@ -39,87 +39,99 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F4F6),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              InkWell(
-                borderRadius: BorderRadius.circular(24),
-                onTap: () => Navigator.of(context).maybePop(),
-                child: const Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Icon(Icons.arrow_back, color: Colors.black87),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 32,
                 ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Choose your language',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.teal,
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Select the language you prefer for guidance and alerts.',
-                style: TextStyle(color: Colors.black54),
-              ),
-              const SizedBox(height: 28),
-              _LanguageCard(
-                title: 'English',
-                subtitle: 'English guidance and interface',
-                selected: _selected == _Language.english,
-                onTap: () => setState(() => _selected = _Language.english),
-              ),
-              const SizedBox(height: 14),
-              _LanguageCard(
-                title: 'اردو',
-                titleAlignment: TextAlign.right,
-                subtitle: 'اردو میں رہنمائی اور معلومات',
-                subtitleAlignment: TextAlign.right,
-                selected: _selected == _Language.urdu,
-                onTap: () => setState(() => _selected = _Language.urdu),
-              ),
-              const SizedBox(height: 14),
-              _LanguageCard(
-                title: 'Roman Urdu',
-                subtitle: 'Roman Urdu mein rehnumai aur maloomat',
-                selected: _selected == _Language.romanUrdu,
-                onTap: () => setState(() => _selected = _Language.romanUrdu),
-              ),
-              const Spacer(),
-              const Divider(),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  child: ElevatedButton(
-                    onPressed: _continue,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal[700],
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      InkWell(
+                        borderRadius: BorderRadius.circular(24),
+                        onTap: () => Navigator.of(context).maybePop(),
+                        child: const Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Icon(Icons.arrow_back, color: Colors.black87),
+                        ),
                       ),
-                      elevation: 2,
-                    ),
-                    child: const Text('Continue', style: TextStyle(fontSize: 16)),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Choose your language',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Select the language you prefer for guidance and alerts.',
+                        style: TextStyle(color: Colors.black54),
+                      ),
+                      const SizedBox(height: 28),
+                      _LanguageCard(
+                        title: 'English',
+                        subtitle: 'English guidance and interface',
+                        selected: _selected == _Language.english,
+                        onTap: () => setState(() => _selected = _Language.english),
+                      ),
+                      const SizedBox(height: 14),
+                      _LanguageCard(
+                        title: 'اردو',
+                        titleAlignment: TextAlign.right,
+                        subtitle: 'اردو میں رہنمائی اور معلومات',
+                        subtitleAlignment: TextAlign.right,
+                        selected: _selected == _Language.urdu,
+                        onTap: () => setState(() => _selected = _Language.urdu),
+                      ),
+                      const SizedBox(height: 14),
+                      _LanguageCard(
+                        title: 'Roman Urdu',
+                        subtitle: 'Roman Urdu mein rehnumai aur maloomat',
+                        selected: _selected == _Language.romanUrdu,
+                        onTap: () => setState(() => _selected = _Language.romanUrdu),
+                      ),
+                      const SizedBox(height: 16),
+                      const Spacer(),
+                      const Divider(),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          child: ElevatedButton(
+                            onPressed: _continue,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.teal[700],
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 2,
+                            ),
+                            child: const Text('Continue', style: TextStyle(fontSize: 16)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Center(
+                        child: Text(
+                          'Language preferences can be changed later from Profile.',
+                          style: TextStyle(fontSize: 12, color: Colors.black45),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
-              const Center(
-                child: Text(
-                  'Language preferences can be changed later from Profile.',
-                  style: TextStyle(fontSize: 12, color: Colors.black45),
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
