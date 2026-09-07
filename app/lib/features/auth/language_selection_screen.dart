@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../core/localization/language_service.dart';
+import '../../core/localization/app_translations.dart';
 import 'login_screen.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
@@ -8,12 +10,26 @@ class LanguageSelectionScreen extends StatefulWidget {
   State<LanguageSelectionScreen> createState() => _LanguageSelectionScreenState();
 }
 
-enum _Language { english, urdu, romanUrdu }
-
 class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
-  _Language _selected = _Language.english;
+  late AppLanguage _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = LanguageService.instance.current;
+  }
+
+  void _selectLanguage(AppLanguage lang) {
+    setState(() => _selected = lang);
+    LanguageService.instance.setLanguage(lang);
+  }
 
   void _continue() {
+    LanguageService.instance.setLanguage(_selected);
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+      return;
+    }
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 400),
@@ -60,25 +76,25 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Choose your language',
-                        style: TextStyle(
+                      Text(
+                        Tr.t('choose_language'),
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.teal,
                         ),
                       ),
                       const SizedBox(height: 12),
-                      const Text(
-                        'Select the language you prefer for guidance and alerts.',
-                        style: TextStyle(color: Colors.black54),
+                      Text(
+                        Tr.t('select_language_subtitle'),
+                        style: const TextStyle(color: Colors.black54),
                       ),
                       const SizedBox(height: 28),
                       _LanguageCard(
                         title: 'English',
                         subtitle: 'English guidance and interface',
-                        selected: _selected == _Language.english,
-                        onTap: () => setState(() => _selected = _Language.english),
+                        selected: _selected == AppLanguage.english,
+                        onTap: () => _selectLanguage(AppLanguage.english),
                       ),
                       const SizedBox(height: 14),
                       _LanguageCard(
@@ -86,15 +102,15 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                         titleAlignment: TextAlign.right,
                         subtitle: 'اردو میں رہنمائی اور معلومات',
                         subtitleAlignment: TextAlign.right,
-                        selected: _selected == _Language.urdu,
-                        onTap: () => setState(() => _selected = _Language.urdu),
+                        selected: _selected == AppLanguage.urdu,
+                        onTap: () => _selectLanguage(AppLanguage.urdu),
                       ),
                       const SizedBox(height: 14),
                       _LanguageCard(
                         title: 'Roman Urdu',
                         subtitle: 'Roman Urdu mein rehnumai aur maloomat',
-                        selected: _selected == _Language.romanUrdu,
-                        onTap: () => setState(() => _selected = _Language.romanUrdu),
+                        selected: _selected == AppLanguage.romanUrdu,
+                        onTap: () => _selectLanguage(AppLanguage.romanUrdu),
                       ),
                       const SizedBox(height: 16),
                       const Spacer(),
@@ -115,15 +131,18 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                               ),
                               elevation: 2,
                             ),
-                            child: const Text('Continue', style: TextStyle(fontSize: 16)),
+                            child: Text(
+                              Tr.t('continue'),
+                              style: const TextStyle(fontSize: 16),
+                            ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Center(
+                      Center(
                         child: Text(
-                          'Language preferences can be changed later from Profile.',
-                          style: TextStyle(fontSize: 12, color: Colors.black45),
+                          Tr.t('language_can_change_later'),
+                          style: const TextStyle(fontSize: 12, color: Colors.black45),
                         ),
                       ),
                     ],

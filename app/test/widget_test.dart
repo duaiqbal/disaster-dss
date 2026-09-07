@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:disaster_dss/core/theme/app_theme.dart';
 import 'package:disaster_dss/core/models/official_alert.dart';
+import 'package:disaster_dss/core/localization/language_service.dart';
 import 'package:disaster_dss/features/dashboard/screens/main_risk_dashboard_screen.dart';
 import 'package:disaster_dss/features/navigation/main_navigation_shell.dart';
 import 'package:disaster_dss/features/chat/chat_screen.dart';
@@ -154,6 +155,84 @@ void main() {
     expect(find.text('Wait and monitor'), findsOneWidget);
     expect(find.text('Risk Trajectory'), findsOneWidget);
     expect(find.text('Factor Breakdown'), findsOneWidget);
+  });
+
+  testWidgets('Language switching dynamically translates navigation and dashboard to Urdu and Roman Urdu', (WidgetTester tester) async {
+    // Reset to English first
+    LanguageService.instance.setLanguage(AppLanguage.english);
+
+    await tester.pumpWidget(
+      ValueListenableBuilder<AppLanguage>(
+        valueListenable: LanguageService.instance.currentLanguage,
+        builder: (context, language, _) {
+          return MaterialApp(
+            theme: AppTheme.lightTheme,
+            builder: (context, child) => Directionality(
+              textDirection: LanguageService.instance.isRtl
+                  ? TextDirection.rtl
+                  : TextDirection.ltr,
+              child: KeyedSubtree(
+                key: ValueKey(language),
+                child: child!,
+              ),
+            ),
+            home: const MainNavigationShell(),
+          );
+        },
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Verify initial English tabs & dashboard
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Forecast'), findsOneWidget);
+    expect(find.text('Map'), findsOneWidget);
+    expect(find.text('Alerts'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
+    expect(find.text('Good evening, Hafsa'), findsOneWidget);
+    expect(find.text('CURRENT CONDITIONS'), findsOneWidget);
+    expect(find.text('HOUSEHOLD RISK'), findsOneWidget);
+    expect(find.text('OFFICIAL WARNING'), findsOneWidget);
+
+    // Switch to Urdu
+    LanguageService.instance.setLanguage(AppLanguage.urdu);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(LanguageService.instance.isRtl, isTrue);
+    expect(find.text('ہوم'), findsOneWidget);
+    expect(find.text('پیشن گوئی'), findsOneWidget);
+    expect(find.text('نقشہ'), findsOneWidget);
+    expect(find.text('اطلاعات'), findsOneWidget);
+    expect(find.text('پروفائل'), findsOneWidget);
+    expect(find.text('شب بخیر، حفصہ'), findsOneWidget);
+    expect(find.text('موجودہ موسمی صورتحال'), findsOneWidget);
+    expect(find.text('گھر کا خطرہ'), findsOneWidget);
+    expect(find.text('سرکاری تنبیہ'), findsOneWidget);
+
+    // Switch to Roman Urdu
+    LanguageService.instance.setLanguage(AppLanguage.romanUrdu);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(LanguageService.instance.isRtl, isFalse);
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Peshangoi'), findsOneWidget);
+    expect(find.text('Naqsha'), findsOneWidget);
+    expect(find.text('Ittilayein'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
+    expect(find.text('Shab-ba-khair, Hafsa'), findsOneWidget);
+    expect(find.text('MOJOODA MOUSAM'), findsOneWidget);
+    expect(find.text('GHAR KA KHATRA'), findsOneWidget);
+    expect(find.text('SARKARI ITTILA'), findsOneWidget);
+
+    // Reset back to English
+    LanguageService.instance.setLanguage(AppLanguage.english);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('Good evening, Hafsa'), findsOneWidget);
   });
 }
 

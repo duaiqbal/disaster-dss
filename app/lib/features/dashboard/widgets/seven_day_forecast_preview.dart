@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/localization/app_translations.dart';
 import '../../../core/models/weather_data.dart';
 
 class SevenDayForecastPreview extends StatelessWidget {
@@ -28,15 +29,15 @@ class SevenDayForecastPreview extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                '7-DAY FORECAST',
+              Text(
+                Tr.t('seven_day_forecast'),
                 style: AppTextStyles.sectionLabel,
               ),
               InkWell(
                 onTap: onViewFull,
-                child: const Text(
-                  'View full',
-                  style: TextStyle(
+                child: Text(
+                  Tr.t('view_full'),
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primary,

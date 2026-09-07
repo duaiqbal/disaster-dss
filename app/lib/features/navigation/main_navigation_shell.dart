@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/models/official_alert.dart';
+import '../../core/localization/app_translations.dart';
 import '../dashboard/screens/main_risk_dashboard_screen.dart';
 import '../forecast/forecast_screen.dart';
 import '../map/map_screen.dart';
@@ -110,11 +111,11 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(0, Icons.home_outlined, Icons.home, 'Home'),
-                _buildNavItem(1, Icons.wb_sunny_outlined, Icons.wb_sunny, 'Forecast'),
-                _buildNavItem(2, Icons.map_outlined, Icons.map, 'Map'),
-                _buildNavItem(3, Icons.notifications_none_outlined, Icons.notifications, 'Alerts'),
-                _buildNavItem(4, Icons.person_outline, Icons.person, 'Profile'),
+                _buildNavItem(0, Icons.home_outlined, Icons.home, Tr.t('tab_home')),
+                _buildNavItem(1, Icons.wb_sunny_outlined, Icons.wb_sunny, Tr.t('tab_forecast')),
+                _buildNavItem(2, Icons.map_outlined, Icons.map, Tr.t('tab_map')),
+                _buildNavItem(3, Icons.notifications_none_outlined, Icons.notifications, Tr.t('tab_alerts')),
+                _buildNavItem(4, Icons.person_outline, Icons.person, Tr.t('tab_profile')),
               ],
             ),
           ),

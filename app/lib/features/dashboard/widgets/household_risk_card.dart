@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/localization/app_translations.dart';
 import '../../../core/models/household_risk.dart';
 
 class HouseholdRiskCard extends StatelessWidget {
@@ -39,7 +40,7 @@ class HouseholdRiskCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'HOUSEHOLD RISK',
+                Tr.t('household_risk'),
                 style: AppTextStyles.sectionLabel.copyWith(
                   color: AppColors.riskModerate,
                 ),
@@ -51,7 +52,7 @@ class HouseholdRiskCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  risk.level,
+                  Tr.riskLevel(risk.level),
                   style: AppTextStyles.badge.copyWith(
                     color: badgeColor,
                     fontSize: 11,
@@ -100,9 +101,9 @@ class HouseholdRiskCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Key Factors:',
-            style: TextStyle(
+          Text(
+            Tr.t('key_factors'),
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -132,12 +133,12 @@ class HouseholdRiskCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('View risk factors'),
-                  SizedBox(width: 6),
-                  Icon(Icons.arrow_forward, size: 16),
+                  Text(Tr.t('view_risk_factors')),
+                  const SizedBox(width: 6),
+                  const Icon(Icons.arrow_forward, size: 16),
                 ],
               ),
             ),

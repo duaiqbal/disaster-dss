@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/localization/app_translations.dart';
 import '../../../core/models/household_risk.dart';
 
 class HouseholdRiskBottomSheet extends StatelessWidget {
@@ -49,9 +50,9 @@ class HouseholdRiskBottomSheet extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Household Risk Factors',
-                        style: TextStyle(
+                      Text(
+                        Tr.t('household_risk_factors'),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -59,7 +60,7 @@ class HouseholdRiskBottomSheet extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Why your household has this risk level',
+                        Tr.t('household_risk_factors_sub'),
                         style: AppTextStyles.caption.copyWith(fontSize: 13),
                       ),
                     ],
@@ -81,13 +82,13 @@ class HouseholdRiskBottomSheet extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Row(
+                    Row(
                       children: [
-                        Icon(Icons.warning_amber_rounded, color: AppColors.primary, size: 22),
-                        SizedBox(width: 8),
+                        const Icon(Icons.warning_amber_rounded, color: AppColors.primary, size: 22),
+                        const SizedBox(width: 8),
                         Text(
-                          'Moderate Household Risk',
-                          style: TextStyle(
+                          Tr.riskLevel(risk.level),
+                          style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
@@ -165,9 +166,9 @@ class HouseholdRiskBottomSheet extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'How your risk is calculated',
-                      style: TextStyle(
+                    Text(
+                      Tr.t('calc_risk_title'),
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,

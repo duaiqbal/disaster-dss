@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/localization/app_translations.dart';
 
 class CommunityRiskCard extends StatelessWidget {
   final VoidCallback onViewReports;
@@ -22,17 +23,17 @@ class CommunityRiskCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.groups_outlined,
                 color: AppColors.primaryDark,
                 size: 20,
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
-                'COMMUNITY RISK',
-                style: TextStyle(
+                Tr.t('community_risk'),
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -62,12 +63,12 @@ class CommunityRiskCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('View Community Reports'),
-                  SizedBox(width: 6),
-                  Icon(Icons.arrow_forward, size: 16),
+                  Text(Tr.t('view_community_reports')),
+                  const SizedBox(width: 6),
+                  const Icon(Icons.arrow_forward, size: 16),
                 ],
               ),
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
+import 'core/localization/language_service.dart';
 import 'features/chat/chat_screen.dart';
 import 'features/map/map_screen.dart';
 import 'features/auth/splash_screen.dart';
@@ -14,11 +15,27 @@ class DisasterDssApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Disaster DSS',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: const SplashScreen(),
+    return ValueListenableBuilder<AppLanguage>(
+      valueListenable: LanguageService.instance.currentLanguage,
+      builder: (context, language, _) {
+        return MaterialApp(
+          title: 'Disaster DSS',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          builder: (context, child) {
+            return Directionality(
+              textDirection: LanguageService.instance.isRtl
+                  ? TextDirection.rtl
+                  : TextDirection.ltr,
+              child: KeyedSubtree(
+                key: ValueKey(language),
+                child: child ?? const SizedBox.shrink(),
+              ),
+            );
+          },
+          home: const SplashScreen(),
+        );
+      },
     );
   }
 }

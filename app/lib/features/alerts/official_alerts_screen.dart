@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/localization/app_translations.dart';
 import '../../core/models/official_alert.dart';
 import '../../core/services/disaster_repository.dart';
 import 'alert_details_screen.dart';
@@ -21,6 +22,21 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
   String _selectedCategory = 'All';
 
   final List<String> _categories = ['All', 'Flood', 'Landslide', 'Heavy Rain'];
+
+  String _getCategoryLabel(String cat) {
+    switch (cat) {
+      case 'All':
+        return Tr.t('cat_all');
+      case 'Flood':
+        return Tr.t('cat_flood');
+      case 'Landslide':
+        return Tr.t('cat_landslide');
+      case 'Heavy Rain':
+        return Tr.t('cat_heavy_rain');
+      default:
+        return cat;
+    }
+  }
 
   @override
   void initState() {
@@ -44,11 +60,11 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Alerts', style: AppTextStyles.screenHeader),
-            Text('Official warnings and important risk updates', style: AppTextStyles.caption),
+            Text(Tr.t('alerts_title'), style: AppTextStyles.screenHeader),
+            Text(Tr.t('alerts_subtitle'), style: AppTextStyles.caption),
           ],
         ),
       ),
@@ -65,7 +81,7 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: ChoiceChip(
-                    label: Text(cat),
+                    label: Text(_getCategoryLabel(cat)),
                     selected: selected,
                     selectedColor: AppColors.primary,
                     backgroundColor: AppColors.surface,

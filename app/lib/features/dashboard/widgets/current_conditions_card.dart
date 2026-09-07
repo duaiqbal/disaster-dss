@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/localization/app_translations.dart';
 import '../../../core/models/weather_data.dart';
 
 class CurrentConditionsCard extends StatelessWidget {
@@ -23,8 +24,8 @@ class CurrentConditionsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'CURRENT CONDITIONS',
+          Text(
+            Tr.t('current_conditions'),
             style: AppTextStyles.sectionLabel,
           ),
           const SizedBox(height: 16),

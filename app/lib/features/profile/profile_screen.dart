@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/localization/language_service.dart';
+import '../../core/localization/app_translations.dart';
 import 'risk_profile_screen.dart';
 import 'emergency_contacts_screen.dart';
 import '../safety/safety_hub_screen.dart';
@@ -17,7 +19,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Profile', style: AppTextStyles.screenHeader),
+        title: Text(Tr.t('tab_profile'), style: AppTextStyles.screenHeader),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -71,9 +73,9 @@ class ProfileScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Household Risk',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      Text(
+                        Tr.t('household_risk'),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       Icon(Icons.home_outlined, color: Colors.grey[700]),
                     ],
@@ -85,9 +87,9 @@ class ProfileScreen extends StatelessWidget {
                       color: AppColors.riskModerateBg,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Text(
-                      'Moderate Risk (68/100)',
-                      style: TextStyle(
+                    child: Text(
+                      '${Tr.riskLevel('Moderate Risk')} (68/100)',
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: AppColors.riskModerate,
@@ -95,9 +97,9 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Based on your current household profile and environmental conditions.',
-                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  Text(
+                    Tr.t('household_risk_desc'),
+                    style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
@@ -114,7 +116,7 @@ class ProfileScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text('View Risk Profile'),
+                      child: Text(Tr.t('view_risk_profile')),
                     ),
                   ),
                 ],
@@ -133,8 +135,8 @@ class ProfileScreen extends StatelessWidget {
                   _buildMenuItem(
                     context: context,
                     icon: Icons.person_search_outlined,
-                    title: 'Risk Profile',
-                    subtitle: 'Manage household characteristics',
+                    title: Tr.t('menu_risk_profile'),
+                    subtitle: Tr.t('menu_risk_profile_sub'),
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -145,8 +147,8 @@ class ProfileScreen extends StatelessWidget {
                   _buildMenuItem(
                     context: context,
                     icon: Icons.contact_phone_outlined,
-                    title: 'Emergency Contacts',
-                    subtitle: 'View important emergency numbers',
+                    title: Tr.t('menu_emergency_contacts'),
+                    subtitle: Tr.t('menu_emergency_contacts_sub'),
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -157,8 +159,8 @@ class ProfileScreen extends StatelessWidget {
                   _buildMenuItem(
                     context: context,
                     icon: Icons.health_and_safety_outlined,
-                    title: 'Safety Hub',
-                    subtitle: 'Safe bag checklist and hazard guides',
+                    title: Tr.t('menu_safety_hub'),
+                    subtitle: Tr.t('menu_safety_hub_sub'),
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -169,8 +171,8 @@ class ProfileScreen extends StatelessWidget {
                   _buildMenuItem(
                     context: context,
                     icon: Icons.rate_review_outlined,
-                    title: 'Give Feedback',
-                    subtitle: 'Help improve the guidance system',
+                    title: Tr.t('menu_feedback'),
+                    subtitle: Tr.t('menu_feedback_sub'),
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -181,8 +183,8 @@ class ProfileScreen extends StatelessWidget {
                   _buildMenuItem(
                     context: context,
                     icon: Icons.language,
-                    title: 'Language',
-                    subtitle: 'English',
+                    title: Tr.t('menu_language'),
+                    subtitle: LanguageService.instance.displayName,
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -206,7 +208,7 @@ class ProfileScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text('Log Out'),
+                child: Text(Tr.t('log_out')),
               ),
             ),
             const SizedBox(height: 60),
@@ -222,13 +224,13 @@ class ProfileScreen extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         backgroundColor: AppColors.surface,
-        title: const Text(
-          'Log out?',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        title: Text(
+          Tr.t('logout_dialog_title'),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        content: const Text(
-          'Are you sure you want to log out of your account?',
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+        content: Text(
+          Tr.t('logout_dialog_desc'),
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         actions: [
@@ -243,7 +245,7 @@ class ProfileScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancel'),
+                  child: Text(Tr.t('cancel')),
                 ),
               ),
               const SizedBox(width: 12),
@@ -261,7 +263,7 @@ class ProfileScreen extends StatelessWidget {
                       onLogout!();
                     }
                   },
-                  child: const Text('Log Out'),
+                  child: Text(Tr.t('log_out')),
                 ),
               ),
             ],

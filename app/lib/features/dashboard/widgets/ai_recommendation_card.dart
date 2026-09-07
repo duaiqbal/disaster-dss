@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/localization/app_translations.dart';
 
 class AiRecommendationCard extends StatelessWidget {
   final String recommendation;
@@ -24,17 +25,17 @@ class AiRecommendationCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.lightbulb_outline,
                 color: AppColors.aiAccent,
                 size: 20,
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
-                'AI Recommendation',
-                style: TextStyle(
+                Tr.t('ai_recommendation'),
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: AppColors.aiAccent,
@@ -64,12 +65,12 @@ class AiRecommendationCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Ask AI Assistant'),
-                  SizedBox(width: 8),
-                  Icon(Icons.smart_toy_outlined, size: 18),
+                  Text(Tr.t('ask_ai_assistant')),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.smart_toy_outlined, size: 18),
                 ],
               ),
             ),

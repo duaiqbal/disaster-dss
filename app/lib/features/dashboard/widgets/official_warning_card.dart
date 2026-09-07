@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/localization/app_translations.dart';
 import '../../../core/models/official_alert.dart';
 
 class OfficialWarningCard extends StatelessWidget {
@@ -25,17 +26,17 @@ class OfficialWarningCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.warning_amber_rounded,
                 color: AppColors.riskHigh,
                 size: 20,
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
-                'OFFICIAL WARNING',
-                style: TextStyle(
+                Tr.t('official_warning'),
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: AppColors.riskHigh,
@@ -65,19 +66,19 @@ class OfficialWarningCard extends StatelessWidget {
           const SizedBox(height: 14),
           InkWell(
             onTap: onViewAlert,
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'View alert',
-                  style: TextStyle(
+                  Tr.t('view_alert'),
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppColors.riskHigh,
                   ),
                 ),
-                SizedBox(width: 4),
-                Icon(
+                const SizedBox(width: 4),
+                const Icon(
                   Icons.open_in_new,
                   size: 14,
                   color: AppColors.riskHigh,

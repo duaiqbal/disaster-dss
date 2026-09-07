@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/localization/app_translations.dart';
 import '../../../core/models/weather_data.dart';
 import '../../../core/models/household_risk.dart';
 import '../../../core/models/official_alert.dart';
@@ -200,8 +201,8 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Good evening, Hafsa',
+              Text(
+                Tr.t('greeting'),
                 style: AppTextStyles.screenHeader,
               ),
               const SizedBox(height: 4),
@@ -214,7 +215,7 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    'Chitral, Khyber Pakhtunkhwa',
+                    Tr.t('location_chitral'),
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.textMuted,
                       fontSize: 13,
