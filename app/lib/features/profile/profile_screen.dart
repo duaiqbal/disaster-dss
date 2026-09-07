@@ -5,6 +5,7 @@ import 'risk_profile_screen.dart';
 import 'emergency_contacts_screen.dart';
 import '../safety/safety_hub_screen.dart';
 import '../feedback/feedback_screen.dart';
+import '../auth/language_selection_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final VoidCallback? onLogout;
@@ -182,7 +183,12 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.language,
                     title: 'Language',
                     subtitle: 'English',
-                    onTap: () {},
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const LanguageSelectionScreen(),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -191,7 +197,7 @@ class ProfileScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: onLogout,
+                onPressed: () => _showLogoutDialog(context),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.riskHigh,
                   side: const BorderSide(color: AppColors.riskHigh),
@@ -206,6 +212,61 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 60),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: AppColors.surface,
+        title: const Text(
+          'Log out?',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        content: const Text(
+          'Are you sure you want to log out of your account?',
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.textPrimary,
+                    side: const BorderSide(color: AppColors.border),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancel'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    if (onLogout != null) {
+                      onLogout!();
+                    }
+                  },
+                  child: const Text('Log Out'),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

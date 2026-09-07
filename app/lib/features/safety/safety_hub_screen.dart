@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../chat/chat_screen.dart';
@@ -97,6 +97,27 @@ class SafetyHubScreen extends StatelessWidget {
         'Rapidly darkening skies',
         'Flash flood risk after heavy rain',
         'Damaged power lines',
+      ],
+    ),
+    _GuideEntry(
+      emoji: '🌫️',
+      title: 'Dust & Air Quality',
+      subtitle: 'How to reduce exposure when air quality deteriorates.',
+      doItems: [
+        'Stay indoors when AQI is poor.',
+        'Keep windows and doors closed.',
+        'Avoid unnecessary outdoor activity.',
+        'Drink water regularly.',
+      ],
+      doNotItems: [
+        'Do not engage in strenuous outdoor activity.',
+        'Do not keep ventilation open during dust storms.',
+        'Do not ignore respiratory symptoms.',
+      ],
+      watchForItems: [
+        'AQI Levels (PM2.5 deterioration)',
+        'Reduced surface visibility',
+        'Official dust & air quality advisories',
       ],
     ),
   ];

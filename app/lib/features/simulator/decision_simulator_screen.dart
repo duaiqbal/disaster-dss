@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../chat/chat_screen.dart';
+import '../safety/safety_hub_screen.dart';
+import '../feedback/feedback_screen.dart';
 
 class DecisionSimulatorScreen extends StatefulWidget {
   const DecisionSimulatorScreen({super.key});
@@ -92,7 +94,10 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
               title: 'Evacuate now',
               subtitle: 'Initiate immediate departure procedures.',
               selected: _selected == 'evacuate',
-              onTap: () => setState(() => _selected = 'evacuate'),
+              onTap: () {
+                setState(() => _selected = 'evacuate');
+                _showEvacuateSheet(context);
+              },
             ),
             const SizedBox(height: 10),
 
@@ -102,7 +107,10 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
               title: 'Wait and monitor',
               subtitle: 'Maintain position and observe developments.',
               selected: _selected == 'wait',
-              onTap: () => setState(() => _selected = 'wait'),
+              onTap: () {
+                setState(() => _selected = 'wait');
+                _showWaitSheet(context);
+              },
             ),
             const SizedBox(height: 24),
 
@@ -127,6 +135,364 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
             const SizedBox(height: 80),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showEvacuateSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'You chose: Evacuate Now',
+                  style: AppTextStyles.cardTitle.copyWith(fontSize: 18),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: AppColors.textMuted),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            Text(
+              'Compare possible outcomes based on current conditions.',
+              style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'CURRENT CONDITIONS',
+              style: AppTextStyles.caption.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.textMuted,
+                fontSize: 11,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(child: _conditionCell('Flash Flood Risk', 'High', AppColors.riskHigh)),
+                const SizedBox(width: 8),
+                Expanded(child: _conditionCell('Landslide Risk', 'Moderate', AppColors.textPrimary)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(child: _conditionCell('Road Access', 'At Risk', AppColors.riskHigh)),
+                const SizedBox(width: 8),
+                Expanded(child: _conditionCell('Rainfall', 'Heavy', AppColors.primary)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'SIMULATED OUTCOME',
+              style: AppTextStyles.caption.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.textMuted,
+                fontSize: 11,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Risk Exposure:', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                      Text('Lower', style: AppTextStyles.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Route Difficulty:', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                      Text('Moderate', style: AppTextStyles.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+                  const Divider(height: 16),
+                  Text('Potential Benefit: Reduced exposure if conditions worsen',
+                      style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                  const SizedBox(height: 4),
+                  Text('Potential Trade-off: Leaving may be difficult because roads are at risk.',
+                      style: AppTextStyles.caption.copyWith(color: AppColors.textMuted)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: const BorderSide(color: AppColors.border),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const FeedbackScreen()));
+                    },
+                    child: const Text('Give Feedback'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SafetyHubScreen()));
+                    },
+                    child: const Text('View Safety Guide'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showWaitSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'SIMULATION RESULT',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                      ),
+                    ),
+                    Text(
+                      'You chose: Wait & Monitor',
+                      style: AppTextStyles.cardTitle.copyWith(fontSize: 18),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: AppColors.textMuted),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            Text(
+              'Compare possible outcomes based on current conditions.',
+              style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(child: _conditionCell('Flash Flood Risk', 'High', AppColors.riskHigh)),
+                const SizedBox(width: 8),
+                Expanded(child: _conditionCell('Landslide Risk', 'Moderate', AppColors.textPrimary)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(child: _conditionCell('Road Access', 'At Risk', AppColors.primary)),
+                const SizedBox(width: 8),
+                Expanded(child: _conditionCell('Rainfall', 'Heavy', AppColors.textPrimary)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.primaryContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.bar_chart, size: 16, color: AppColors.primary),
+                      const SizedBox(width: 6),
+                      Text('Simulated Outcome', style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Risk Exposure:', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                      Text('Moderate', style: AppTextStyles.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Route Difficulty:', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                      Text('Manageable', style: AppTextStyles.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.check_circle_outline, size: 14, color: AppColors.primary),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Avoid unnecessary movement while conditions remain stable.',
+                          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.warning_amber_rounded, size: 14, color: AppColors.riskHigh),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Risk may increase sharply if rainfall intensifies.',
+                          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Center(
+              child: Text(
+                'Simulation result — not an emergency instruction.',
+                style: AppTextStyles.caption.copyWith(color: AppColors.textMuted, fontSize: 11),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                icon: const Icon(Icons.menu_book_outlined, size: 16),
+                label: const Text('View Safety Guide'),
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const SafetyHubScreen()));
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  side: const BorderSide(color: AppColors.border),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const FeedbackScreen()));
+                },
+                child: const Text('Give Feedback'),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Widget _conditionCell(String label, String val, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: AppTextStyles.caption.copyWith(fontSize: 10, color: AppColors.textMuted)),
+          const SizedBox(height: 3),
+          Text(val, style: AppTextStyles.cardTitle.copyWith(fontSize: 13, color: color)),
+        ],
       ),
     );
   }

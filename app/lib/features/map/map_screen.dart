@@ -8,6 +8,7 @@ import '../../core/local_db/local_db.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../chat/chat_screen.dart';
+import '../safety/safety_hub_screen.dart';
 
 class _HazardInfo {
   final String hazardLevel;
@@ -584,9 +585,7 @@ class _MapScreenState extends State<MapScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: () {
-                          // Navigate to risk details
-                        },
+                        onPressed: () => _showRiskFactorSheet(context),
                         child: const Text('View risk factors'),
                       ),
                     ),
@@ -621,6 +620,218 @@ class _MapScreenState extends State<MapScreen> {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  void _showRiskFactorSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'High Landslide Risk Zone',
+                  style: AppTextStyles.cardTitle.copyWith(fontSize: 18),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: AppColors.textMuted),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            Text(
+              'Current risk factors for this area.',
+              style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.aiCardBg,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.aiCardBorder),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.insert_chart_outlined, size: 16, color: AppColors.primary),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Key Indicators',
+                        style: AppTextStyles.caption.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: _indicatorBox('Landslide Risk', 'High', AppColors.riskHigh)),
+                      const SizedBox(width: 8),
+                      Expanded(child: _indicatorBox('Rainfall', 'Heavy', AppColors.textPrimary)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(child: _indicatorBox('Slope Stability', 'Low', AppColors.riskHigh)),
+                      const SizedBox(width: 8),
+                      Expanded(child: _indicatorBox('Road Access', 'At Risk', AppColors.primary)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.primaryContainer,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.info_outline, size: 16, color: AppColors.primary),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Why this area is at risk',
+                        style: AppTextStyles.caption.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Heavy rainfall can increase soil saturation and slope instability. Roads near steep terrain may become difficult to access.',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.shield_outlined, size: 16, color: AppColors.primary),
+                      const SizedBox(width: 6),
+                      Text(
+                        'What to do',
+                        style: AppTextStyles.caption.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text('• Avoid unstable slopes.', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                  const SizedBox(height: 4),
+                  Text('• Monitor official alerts.', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                  const SizedBox(height: 4),
+                  Text('• Keep evacuation routes ready.', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                icon: const Icon(Icons.menu_book_outlined, size: 16),
+                label: const Text('View Safety Guide'),
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const SafetyHubScreen()));
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  side: const BorderSide(color: AppColors.border),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                icon: const Icon(Icons.close, size: 16),
+                label: const Text('Close'),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Widget _indicatorBox(String title, String value, Color valueColor) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: AppTextStyles.caption.copyWith(fontSize: 11, color: AppColors.textMuted)),
+          const SizedBox(height: 4),
+          Text(value, style: AppTextStyles.cardTitle.copyWith(fontSize: 14, color: valueColor)),
         ],
       ),
     );
